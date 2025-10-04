@@ -1,7 +1,9 @@
-import crypto_functions
+import cryptography_functions
 import json
 
 """Funciones para gestionar el archivo json de base de datos"""
+
+# TODO: FALTA TODA LA LÓGICA DE CIFRADO/DESCIFRADO EN TODAS LAS FUNCIONES
 
 def load_users() -> dict:
     """Función que devuelve el diccionario con TODOS los usuarios de la base de datos (json). Devuelve un diccionario vacío en caso de error."""
