@@ -1,0 +1,10 @@
+{
+    "kp\u00f1k": {
+        "password_hash": "e46240714b5db3a23eee60479a623efba4d633d27fe4f03c904b9e219a7fbe60",
+        "role": "user"
+    },
+    "oooo": {
+        "password_hash": "8b285aa098f20922bc0a7e6320b5e2785628589728bc2b52f79a58dc7672eeeb",
+        "role": "user"
+    }
+}
