@@ -22,5 +22,21 @@
     "nombre": "Rida",
     "apellidos": "Rida",
     "correo_electronico": "ridaaaaaa"
+  },
+  "rr": {
+    "rol": "usuario_comun",
+    "usuario_name": "rr",
+    "password_hash": "2ugwwKCFRWsXxGg8Pd8/Vdhfmr4vbe5zE/K/SJ4Z80jqfqUK/AsMzperfuIbbw5B",
+    "nombre": "rrr",
+    "apellidos": "rr",
+    "correo_electronico": "rr"
+  },
+  "a": {
+    "rol": "usuario_comun",
+    "usuario_name": "a",
+    "password_hash": "MN9YdWYfJgSwL3P3LVDh4FDD0dz9f+O4k0/l2yIrHXKLUW2ouPlFV/Ysploqmsyq",
+    "nombre": "a",
+    "apellidos": "aa",
+    "correo_electronico": "a"
   }
 }

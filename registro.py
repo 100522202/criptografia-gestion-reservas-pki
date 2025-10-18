@@ -1,8 +1,8 @@
 import json
-import os
-import os
 from cryptography.hazmat.primitives.kdf.argon2 import Argon2id
 from cryptography.exceptions import InvalidKey
+import os, base64
+from generar_claves import generar_par_claves
 
 USUARIOS_FILE = "usuarios.json"
 
@@ -21,6 +21,7 @@ def guardar_usuarios(usuarios):
 
 def hash_password(password: str) -> str:
     salt = os.urandom(16)
+
     kdf = Argon2id(
         salt=salt,
         length=32,
@@ -30,14 +31,34 @@ def hash_password(password: str) -> str:
         ad=None,
         secret=None
     )
-    return kdf.derive_phc_encoded(password.encode())
+
+    key = kdf.derive(password.encode())
+
+    # Guardamos sal + clave derivada en base64
+    return base64.b64encode(salt + key).decode("utf-8")
 
 def verify_password(password: str, encoded: str) -> bool:
     try:
-        Argon2id.verify_phc_encoded(encoded, password.encode())
+        data = base64.b64decode(encoded.encode("utf-8"))
+        salt = data[:16]
+        stored_key = data[16:]
+
+        kdf = Argon2id(
+            salt=salt,
+            length=32,
+            iterations=2,
+            lanes=1,
+            memory_cost=32 * 1024,
+            ad=None,
+            secret=None
+        )
+
+        # Esta línea lanza InvalidKey si la verificación falla
+        kdf.verify(password.encode(), stored_key)
         return True
     except InvalidKey:
         return False
+
 
 def registro_usuario(usuario_name, password, nombre, apellidos, correo, archivo=USUARIOS_FILE):
     hash_psw = hash_password(password)
@@ -56,5 +77,6 @@ def registro_usuario(usuario_name, password, nombre, apellidos, correo, archivo=
         "correo_electronico": correo
     }
 
+    generar_par_claves(usuario_name, password)
     guardar_usuarios(usuarios)
     return True, "Usuario registrado correctamente."

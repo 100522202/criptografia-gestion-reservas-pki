@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-from registro import registro_usuario, verify_password
+from registro import registro_usuario
 from login import login_usuario
 import json
 import os
