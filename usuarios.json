@@ -1,36 +1,4 @@
 {
-  "kp\u00f1k": {
-    "password_hash": "e46240714b5db3a23eee60479a623efba4d633d27fe4f03c904b9e219a7fbe60",
-    "role": "user"
-  },
-  "oooo": {
-    "password_hash": "8b285aa098f20922bc0a7e6320b5e2785628589728bc2b52f79a58dc7672eeeb",
-    "role": "user"
-  },
-  "rida": {
-    "rol": "usuario_comun",
-    "usuario_name": "rida",
-    "password_hash": "$argon2id$v=19$m=32768,t=2,p=1$N94zUJrNLvcRyy6xjMqAMA$Y3tgsGsS9nVcdHGIWIxbpMkWANtQRO0RxH+7kyO2xw4",
-    "nombre": "rida",
-    "apellidos": "rida",
-    "correo_electronico": "rida@rida.com"
-  },
-  "rida1": {
-    "rol": "usuario_comun",
-    "usuario_name": "rida1",
-    "password_hash": "$argon2id$v=19$m=32768,t=2,p=1$7cwbsjssH9Oq7wZttSLDBA$nY+0WTneBaXE22nCzlI7SUzajgv+egRm6DvZj9dbbkU",
-    "nombre": "Rida",
-    "apellidos": "Rida",
-    "correo_electronico": "ridaaaaaa"
-  },
-  "rr": {
-    "rol": "usuario_comun",
-    "usuario_name": "rr",
-    "password_hash": "2ugwwKCFRWsXxGg8Pd8/Vdhfmr4vbe5zE/K/SJ4Z80jqfqUK/AsMzperfuIbbw5B",
-    "nombre": "rrr",
-    "apellidos": "rr",
-    "correo_electronico": "rr"
-  },
   "a": {
     "rol": "usuario_comun",
     "usuario_name": "a",

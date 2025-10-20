@@ -20,11 +20,12 @@ class Interfaz:
     def __init__(self, root):
         self.root = root
         self.root.title("App de Reservas — Login / Registro")
-        self.root.geometry("400x400")
+        self.root.geometry("400x460")
+        self.root.configure(bg="#e6f2ff")  # Fondo de la ventana
 
         self.usuarios = cargar_usuarios()
 
-        self.main_frame = tk.Frame(self.root)
+        self.main_frame = tk.Frame(self.root, bg="#e6f2ff")
         self.main_frame.pack(fill=tk.BOTH, expand=True)
 
         self._mostrar_login()
@@ -33,24 +34,40 @@ class Interfaz:
         for widget in self.main_frame.winfo_children():
             widget.destroy()
 
+    def _estilo_entry(self, entry):
+        entry.config(
+            font=("Arial", 11),
+            bd=2,
+            relief="groove",
+            highlightbackground="#b3d9ff",
+            highlightthickness=1
+        )
+
     def _mostrar_login(self):
         self.limpiar_frame()
 
-        tk.Label(self.main_frame, text="Login", font=("Arial", 16)).pack(pady=10)
-        tk.Label(self.main_frame, text="Usuario:").pack()
+        tk.Label(self.main_frame, text="Iniciar Sesión", font=("Arial", 18, "bold"), bg="#e6f2ff").pack(pady=20)
+        
+        tk.Label(self.main_frame, text="Usuario:", bg="#e6f2ff").pack()
         self.login_usuario = tk.Entry(self.main_frame)
-        self.login_usuario.pack()
-        tk.Label(self.main_frame, text="Contraseña:").pack()
-        self.login_password = tk.Entry(self.main_frame, show="*")
-        self.login_password.pack()
+        self._estilo_entry(self.login_usuario)
+        self.login_usuario.pack(pady=5)
 
-        tk.Button(self.main_frame, text="Entrar", command=self._accion_login).pack(pady=10)
-        tk.Button(self.main_frame, text="Ir a Registro", command=self._mostrar_registro).pack()
+        tk.Label(self.main_frame, text="Contraseña:", bg="#e6f2ff").pack()
+        self.login_password = tk.Entry(self.main_frame, show="*")
+        self._estilo_entry(self.login_password)
+        self.login_password.pack(pady=5)
+
+        tk.Button(self.main_frame, text="Entrar", bg="#4da6ff", fg="white",
+                  font=("Arial", 11), command=self._accion_login).pack(pady=15)
+
+        tk.Button(self.main_frame, text="Ir a Registro", bg="#d9d9d9",
+                  font=("Arial", 10), command=self._mostrar_registro).pack()
 
     def _mostrar_registro(self):
         self.limpiar_frame()
 
-        tk.Label(self.main_frame, text="Registro", font=("Arial", 16)).pack(pady=10)
+        tk.Label(self.main_frame, text="Registro de Usuario", font=("Arial", 18, "bold"), bg="#e6f2ff").pack(pady=20)
 
         self.registro_campos = {}
         campos = [
@@ -63,13 +80,17 @@ class Interfaz:
         ]
 
         for label, clave, *extra in campos:
-            tk.Label(self.main_frame, text=f"{label}:").pack()
+            tk.Label(self.main_frame, text=f"{label}:", bg="#e6f2ff").pack()
             entry = tk.Entry(self.main_frame, show=extra[0] if extra else "")
-            entry.pack()
+            self._estilo_entry(entry)
+            entry.pack(pady=4)
             self.registro_campos[clave] = entry
 
-        tk.Button(self.main_frame, text="Registrar", command=self._accion_registro).pack(pady=10)
-        tk.Button(self.main_frame, text="Ir a Login", command=self._mostrar_login).pack()
+        tk.Button(self.main_frame, text="Registrar", bg="#4da6ff", fg="white",
+                  font=("Arial", 11), command=self._accion_registro).pack(pady=15)
+
+        tk.Button(self.main_frame, text="Ir a Login", bg="#d9d9d9",
+                  font=("Arial", 10), command=self._mostrar_login).pack()
 
     def _accion_login(self):
         usuario = self.login_usuario.get().strip()
@@ -86,7 +107,6 @@ class Interfaz:
             self.login_password.delete(0, tk.END)
         else:
             messagebox.showerror("Error", mensaje)
-
 
     def _accion_registro(self):
         campos = self.registro_campos
