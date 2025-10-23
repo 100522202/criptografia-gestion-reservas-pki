@@ -1,10 +1,7 @@
 import json
 import os
-import base64
 import password_management
-from cryptography.hazmat.primitives.kdf.argon2 import Argon2id
-from cryptography.exceptions import InvalidKey
-from key_management import cargar_clave_privada
+import key_management
 
 USUARIOS_FILE = "usuarios.json"
 
@@ -29,6 +26,6 @@ def login_usuario(usuario_name:str, password):
         return False, "Contraseña incorrecta"
     
     #Cargamos la clave privada del usuario
-    clave_privada = cargar_clave_privada(usuario_name, password)
+    clave_privada = key_management.cargar_clave_privada(usuario_name, password)
     rol = usuarios[usuario_name]["rol"]
     return True, f"Bienvenido, {usuario_name}. Rol: {rol}"

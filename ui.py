@@ -132,8 +132,3 @@ class Interfaz:
             self._mostrar_login()
         else:
             messagebox.showerror("Error", mensaje)
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = Interfaz(root)
-    root.mainloop()
