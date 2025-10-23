@@ -3,7 +3,7 @@ import os
 import password_management
 import key_management
 
-USUARIOS_FILE = "usuarios.json"
+USUARIOS_FILE = "database/usuarios.json"
 
 def cargar_usuarios():
     if not os.path.exists(USUARIOS_FILE):

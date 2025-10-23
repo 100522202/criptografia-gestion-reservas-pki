@@ -1,20 +1,10 @@
 import tkinter as tk
+import user_management
 from tkinter import messagebox
-from registro import registro_usuario
 from login import login_usuario
-import json
-import os
 
-USUARIOS_FILE = "usuarios.json"
 
-def cargar_usuarios():
-    if not os.path.exists(USUARIOS_FILE):
-        return {}
-    with open(USUARIOS_FILE, "r", encoding="utf-8") as f:
-        try:
-            return json.load(f)
-        except json.JSONDecodeError:
-            return {}
+USUARIOS_FILE = "database/usuarios.json"
 
 class Interfaz:
     def __init__(self, root):
@@ -23,7 +13,7 @@ class Interfaz:
         self.root.geometry("400x460")
         self.root.configure(bg="#e6f2ff")  # Fondo de la ventana
 
-        self.usuarios = cargar_usuarios()
+        self.usuarios = user_management.cargar_usuarios()
 
         self.main_frame = tk.Frame(self.root, bg="#e6f2ff")
         self.main_frame.pack(fill=tk.BOTH, expand=True)
@@ -125,9 +115,9 @@ class Interfaz:
             messagebox.showerror("Error", "Las contraseñas no coinciden")
             return
 
-        exito, mensaje = registro_usuario(usuario, pw1, nombre, apellidos, correo)
+        exito, mensaje = user_management.registro_usuario(usuario, pw1, nombre, apellidos, correo)
         if exito:
-            self.usuarios = cargar_usuarios()
+            self.usuarios = user_management.cargar_usuarios()
             messagebox.showinfo("Registro correcto", mensaje)
             self._mostrar_login()
         else:

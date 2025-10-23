@@ -6,9 +6,8 @@ from cryptography.hazmat.backends import default_backend
 CARPETA_CLAVES = "claves"
 
 def generar_clave_privada(password:str):
-    """FUncíon que genera una clave privada RSA, la serializa y la cifra con 
-    la contraseña del usuario. Va a devovler los bytes serializados de la clave privada 
-    y la clave"""
+    """Función que genera una clave privada RSA, la serializa y la cifra con 
+    la contraseña del usuario. Va a devovler los bytes serializados de la clave privada y la clave"""
 
     clave_privada = rsa.generate_private_key(
         public_exponent=65537,
