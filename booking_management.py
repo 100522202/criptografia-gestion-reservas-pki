@@ -11,9 +11,10 @@ from cryptography.hazmat.backends import default_backend
 RESERVAS_FILE = "database/reservas.json"
 
 class Booking:
-    def __init__(self, usuario_asociado: str, datos):
+    def __init__(self, usuario_asociado: str, datos:str, fecha_asociada:str):
         self.datos = datos
         self.usuario_asociado = usuario_asociado
+        self.fecha_asociada = fecha_asociada
 
     def cifrar_reserva(self) -> dict:
         """Método que va a cifrar la reserva de manera híbrida.
@@ -21,8 +22,11 @@ class Booking:
         con la clave pública del usuario. Devuelve la reserva cifrada y los 
         elementos necesarios para descifrarla en un diccionario: 
         reserva cifrada, clave aes, nonce"""
+        # Construimos la lista de datos
+        datos_completos = [self.usuario_asociado, self.fecha_asociada, self.datos]  
+
         # Codificamos los datos como bytes para que AES pueda usarlos
-        datos_byte = self.datos.encode()
+        datos_byte = json.dumps(datos_completos).encode()
         usuario_bytes = self.usuario_asociado.encode()
 
         #Generamos la clave AES aleatoria
@@ -34,7 +38,7 @@ class Booking:
         #Generamos un nonce de 12 bytes (semilla única para cada cifrado)
         nonce = os.urandom(12)
 
-        #Ciframos los datos de la reserva con AES-GCM: solo será válida para el usuario asociado
+        #Ciframos los datos de la reserva con AES-GCM: solo será válida para el usuario asociado: AUTENTICACIÓN
         reserva_cifrada = aesgcm.encrypt(nonce, datos_byte, associated_data=usuario_bytes)
 
         #Ahora debemos cifrar esta clave AES con la clave pública
@@ -61,7 +65,7 @@ class Booking:
 def descifrar_reserva(usuario_name:str, password:str, reserva_cifrada:dict) ->dict:
         """Método que descifra la reserva cifrada con AES-GCM y RSA
         Recupera la clave privada del usuario luego usa esa clave pare descifrar
-        la clave AES. Y con esa clave AES descifra el contenido de la reserva"""
+        la clave AES. Y con esa clave AES descifra el contenido de la reserva."""
 
         #Primero debemos cargar la clave priamria del usuario desde su archivo .pem
         #Usando su contaseña
@@ -75,7 +79,7 @@ def descifrar_reserva(usuario_name:str, password:str, reserva_cifrada:dict) ->di
 
         #Desciframos la clave AES que está cifrada con la clave pública RSA
         clave_aes = clave_privada.decrypt(
-            b64decode(reserva_cifrada["clave_cifrada"]), #Convertimos de base64 a bytes
+            b64decode(reserva_cifrada["aes_clave_cifrada"]), #Convertimos de base64 a bytes
             padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA256()),
                 algorithm=hashes.SHA256(),
@@ -86,14 +90,15 @@ def descifrar_reserva(usuario_name:str, password:str, reserva_cifrada:dict) ->di
         #Creamoso el objeto AES-GCM con la clave AES recuperada
         aesgcm = AESGCM(clave_aes)
 
-        #Obtenemos el nonce y el mensaje cifrado (en base64) y los convertimos a bytes
+        # Desciframos los datos
         nonce = b64decode(reserva_cifrada["nonce"])
-        texto_cifrado = b64decode(reserva_cifrada["texto_cifrado"])
+        texto_cifrado = b64decode(reserva_cifrada["reserva_cifrada"])
+        usuario_bytes = usuario_name.encode()
 
         #Desciframos el mensaje
-        datos_descifrados = aesgcm.decrypt(nonce, texto_cifrado, associated_data=None)
+        datos_descifrados = aesgcm.decrypt(nonce, texto_cifrado, associated_data=usuario_bytes)
 
-        #Convertir los bytes descifrados a texto y luego a diccionario
+        # Convertimos de bytes a lista
         return json.loads(datos_descifrados.decode())
     
 def almacenar_reserva(reserva_cifrada:dict, ruta_archivo:str) -> bool:
@@ -128,6 +133,30 @@ def almacenar_reserva(reserva_cifrada:dict, ruta_archivo:str) -> bool:
 
     return True
 
+def obtener_reservas(usuario_asociado:str, password:str) -> list:
+    """Método que saca todas las reservas de un usuario de reservas.json"""
+    if not os.path.exists(RESERVAS_FILE):
+        return []
+
+    with open(RESERVAS_FILE, "r") as f:
+        try:
+            todas_las_reservas = json.load(f)
+        except json.JSONDecodeError:
+            return []
+
+    reservas_usuario = []
+
+    for reserva in todas_las_reservas:
+        try:
+            # Intentamos descifrar la reserva con la función descifrar_reserva
+            datos = descifrar_reserva(usuario_asociado, password, reserva)
+            reservas_usuario.append(datos)
+        except Exception:
+            # Si falla (no es del usuario o datos corruptos), la ignoramos
+            continue
+
+    return reservas_usuario
+
 def is_encrypted(reserva: dict):
      """Devuelve True si una reserva está cifrada, False eoc."""
      if not isinstance(reserva, dict):
@@ -140,7 +169,7 @@ def bytes_a_base64(data: bytes) -> str:
     """Convierte bytes a string en Base64."""
     return b64encode(data).decode()
 
-def guardar_reserva(usuario, email, telefono, dni, fecha, detalles, ventana_crear):
+def guardar_reserva(usuario, email, telefono, dni, fecha, ventana_crear):
     """Guarda una nueva reserva cifrada en el archivo JSON."""
     if not all([email, telefono, dni, fecha]):
         messagebox.showwarning("Campos vacíos", "Debes completar todos los campos obligatorios.")
@@ -151,11 +180,11 @@ def guardar_reserva(usuario, email, telefono, dni, fecha, detalles, ventana_crea
         datos = {
             "email": email,
             "telefono": telefono,
-            "dni": dni,
+            "dni": dni
         }
 
         # Creamos y ciframos la reserva
-        booking = Booking(usuario, json.dumps(datos))
+        booking = Booking(usuario, json.dumps(datos), fecha)
         reserva_cifrada = booking.cifrar_reserva()
 
         # Guardamos en el archivo JSON
