@@ -6,5 +6,21 @@
     "nombre": "a",
     "apellidos": "aa",
     "correo_electronico": "a"
+  },
+  "papi": {
+    "rol": "usuario_comun",
+    "usuario_name": "papi",
+    "password_hash": "U3ISJ0urRECAHGr3IJZVFtYPvEeKqYuS+syrIheRddQNd3wVeUR7RVlRpiQ1JjNb",
+    "nombre": "a",
+    "apellidos": "a",
+    "correo_electronico": "asasasa@gmail.com"
+  },
+  "hola": {
+    "rol": "usuario_comun",
+    "usuario_name": "hola",
+    "password_hash": "Ox5vg24n51QALc30LY9Xok/g5IVjEoUeL/SS0TZrLf156UGlK0x+WzE7xOBm5irc",
+    "nombre": "e",
+    "apellidos": "e",
+    "correo_electronico": "e"
   }
 }
