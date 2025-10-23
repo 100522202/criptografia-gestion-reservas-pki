@@ -2,13 +2,16 @@ import os
 import json
 from base64 import b64encode
 from base64 import b64decode
+from tkinter import messagebox
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.backends import default_backend
 
+RESERVAS_FILE = "database/reservas.json"
+
 class Booking:
-    def __init__(self, usuario_asociado, datos):
+    def __init__(self, usuario_asociado: str, datos):
         self.datos = datos
         self.usuario_asociado = usuario_asociado
 
@@ -18,7 +21,6 @@ class Booking:
         con la clave pública del usuario. Devuelve la reserva cifrada y los 
         elementos necesarios para descifrarla en un diccionario: 
         reserva cifrada, clave aes, nonce"""
-
         # Codificamos los datos como bytes para que AES pueda usarlos
         datos_byte = self.datos.encode()
         usuario_bytes = self.usuario_asociado.encode()
@@ -137,4 +139,30 @@ def is_encrypted(reserva: dict):
 def bytes_a_base64(data: bytes) -> str:
     """Convierte bytes a string en Base64."""
     return b64encode(data).decode()
+
+def guardar_reserva(usuario, email, telefono, dni, fecha, detalles, ventana_crear):
+    """Guarda una nueva reserva cifrada en el archivo JSON."""
+    if not all([email, telefono, dni, fecha]):
+        messagebox.showwarning("Campos vacíos", "Debes completar todos los campos obligatorios.")
+        return
+
+    try:
+        # Construimos un diccionario con los datos de la reserva
+        datos = {
+            "email": email,
+            "telefono": telefono,
+            "dni": dni,
+        }
+
+        # Creamos y ciframos la reserva
+        booking = Booking(usuario, json.dumps(datos))
+        reserva_cifrada = booking.cifrar_reserva()
+
+        # Guardamos en el archivo JSON
+        almacenar_reserva(reserva_cifrada, RESERVAS_FILE)
+
+        messagebox.showinfo("Éxito", "Reserva creada y cifrada correctamente.")
+        ventana_crear.destroy()
+    except Exception as e:
+        messagebox.showerror("Error", f"No se pudo crear la reserva:\n{e}")
           
