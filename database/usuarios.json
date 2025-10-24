@@ -22,5 +22,13 @@
     "nombre": "e",
     "apellidos": "e",
     "correo_electronico": "e"
+  },
+  "z": {
+    "rol": "usuario_comun",
+    "usuario_name": "z",
+    "password_hash": "RoiF6u2chEuBBjCHN2BCkxKVurfDeSWUwdKEtOV9/jQwgVZ1fmrgHk441NJfBqs7",
+    "nombre": "z",
+    "apellidos": "z",
+    "correo_electronico": "zz"
   }
 }

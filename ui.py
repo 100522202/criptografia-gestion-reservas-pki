@@ -1,5 +1,4 @@
 import tkinter as tk
-import json
 import user_management
 import booking_management
 from tkinter import messagebox, ttk
@@ -87,7 +86,7 @@ class Interfaz:
     def _accion_login(self):
         usuario = self.login_usuario.get().strip()
         password = self.login_password.get()
-    
+
         if usuario == "" or password == "":
             messagebox.showwarning("Datos incompletos", "Completa usuario y contraseña")
             return
@@ -135,12 +134,8 @@ class Interfaz:
 
         tk.Label(ventana_reservas, text=f"Reservas del usuario {usuario}", font=("Arial", 14, "bold")).pack(pady=10)
 
-        # Intentar cargar las reservas del archivo
-        try:
-            with open("reservas.json", "r") as f:
-                reservas = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            reservas = []
+        # Intentar cargar las reservas del archivo # TODO
+        reservas = booking_management.obtener_reservas(usuario, )
 
         # Si no hay reservas, mostrar mensaje
         if not reservas:
@@ -248,7 +243,6 @@ class Interfaz:
                 entry_telefono.get().strip(),
                 entry_dni.get().strip(),
                 entry_fecha.get().strip(),
-                entry_detalles.get('1.0', tk.END).strip(),
                 ventana_crear
             )
         )
