@@ -15,14 +15,6 @@
     "apellidos": "a",
     "correo_electronico": "asasasa@gmail.com"
   },
-  "hola": {
-    "rol": "usuario_comun",
-    "usuario_name": "hola",
-    "password_hash": "Ox5vg24n51QALc30LY9Xok/g5IVjEoUeL/SS0TZrLf156UGlK0x+WzE7xOBm5irc",
-    "nombre": "e",
-    "apellidos": "e",
-    "correo_electronico": "e"
-  },
   "z": {
     "rol": "usuario_comun",
     "usuario_name": "z",
@@ -38,5 +30,21 @@
     "nombre": "h",
     "apellidos": "h",
     "correo_electronico": "h"
+  },
+  "hola": {
+    "rol": "usuario_comun",
+    "usuario_name": "hola",
+    "password_hash": "Ldpq9NvAe75yXJzicu9n+7scHN8DieioCTCmSyNHO4zDFRVfk5rfzWkgFqxTEFqc",
+    "nombre": "nombre",
+    "apellidos": "apell",
+    "correo_electronico": "email"
+  },
+  "x": {
+    "rol": "usuario_comun",
+    "usuario_name": "x",
+    "password_hash": "U4HA1pemMGVn8XVPEfc9V2FEXjBVbj+YYtOB5rCjxG6yg0UPf8eRivv8LAscpTlC",
+    "nombre": "x",
+    "apellidos": "x",
+    "correo_electronico": "x"
   }
 }

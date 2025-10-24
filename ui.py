@@ -1,6 +1,7 @@
 import tkinter as tk
 import user_management
 import booking_management
+import json
 from tkinter import messagebox, ttk
 from login import login_usuario
 
@@ -97,7 +98,7 @@ class Interfaz:
             self.login_usuario.delete(0, tk.END)
             self.login_password.delete(0, tk.END)
             # Crear nueva ventana para mostrar las reservas
-            self._mostrar_menu(usuario)
+            self._mostrar_menu(usuario, password)
         else:
             messagebox.showerror("Error", mensaje)
 
@@ -126,7 +127,7 @@ class Interfaz:
         else:
             messagebox.showerror("Error", mensaje)
     
-    def _mostrar_menu(self, usuario):
+    def _mostrar_menu(self, usuario, password):
         """Ventana de menú de reservas con dos opciones: crear o ver"""
         ventana_menu = tk.Toplevel(self.root)
         ventana_menu.title(f"Opciones de reservas de {usuario}")
@@ -147,7 +148,7 @@ class Interfaz:
             fg="white",
             padx=10,
             pady=5,
-            command=lambda: self._abrir_crear_reserva(usuario)
+            command=lambda: self._abrir_crear_reserva(usuario, password)
         )
         boton_crear.pack(pady=10)
 
@@ -160,12 +161,15 @@ class Interfaz:
             fg="white",
             padx=10,
             pady=5,
-            command=lambda: self._abrir_ver_reservas(usuario)
+            command=lambda: self._abrir_ver_reservas(usuario, password)
         )
         boton_ver.pack(pady=10)
     
-    def _abrir_crear_reserva(self, usuario):
+    def _abrir_crear_reserva(self, usuario, password):
         """Crea una ventana para introducir una nueva reserva, cifrarla y almacenarla."""
+        #
+        print("usuario:", usuario, "contraseña", password)
+        #
         ventana_crear = tk.Toplevel(self.root)
         ventana_crear.title(f"Nueva reserva - {usuario}")
         ventana_crear.geometry("400x500")
@@ -225,7 +229,7 @@ class Interfaz:
         )
         boton_reservar.pack(pady=15)
     
-    def _abrir_ver_reservas(self, usuario):
+    def _abrir_ver_reservas(self, usuario, password):
         """Crea una ventana y muestra las reservas almacenadas"""
         ventana_reservas = tk.Toplevel(self.root)
         ventana_reservas.title(f"Reservas de {usuario}")
@@ -234,7 +238,12 @@ class Interfaz:
         tk.Label(ventana_reservas, text=f"Reservas del usuario {usuario}", font=("Arial", 14, "bold")).pack(pady=10)
 
         # Intentar cargar las reservas del archivo
-        reservas = booking_management.obtener_reservas(usuario, self.login_password)
+        reservas = booking_management.obtener_reservas(usuario, password)
+
+        #
+        print("usuario:", usuario, "contraseña", password)
+        print(reservas)
+        #
 
         # Si no hay reservas, mostrar mensaje
         if not reservas:
@@ -244,31 +253,29 @@ class Interfaz:
                 font=("Arial", 12)
             ).pack(pady=20)
         else:
-            # Crear un Treeview para mostrar las reservas
+            # Crear un Treeview para mostrar solo la fecha y los datos
             tree = ttk.Treeview(
                 ventana_reservas,
-                columns=("reserva", "clave", "nonce"),
+                columns=("fecha", "datos"),
                 show="headings"
             )
-            tree.heading("reserva", text="Reserva cifrada")
-            tree.heading("clave", text="Clave AES cifrada")
-            tree.heading("nonce", text="Nonce")
+            tree.heading("fecha", text="Fecha de la reserva")
+            tree.heading("datos", text="Datos de la reserva")
 
             # Ajustar ancho de columnas
-            tree.column("reserva", width=150)
-            tree.column("clave", width=150)
-            tree.column("nonce", width=150)
+            tree.column("fecha", width=120)
+            tree.column("datos", width=320)
 
             # Insertar cada reserva en la tabla
             for r in reservas:
-                tree.insert(
-                    "",
-                    tk.END,
-                    values=(
-                        r["reserva_cifrada"][:20] + "...",
-                        r["aes_clave_cifrada"][:20] + "...",
-                        r["nonce"][:20] + "..."
-                    )
-                )
+                try:
+                    datos = json.loads(r[2])  # Convertir el string JSON en diccionario
+                    datos_formateados = f"Email: {datos.get('email', '')}, Teléfono: {datos.get('telefono', '')}, DNI: {datos.get('dni', '')}"
+                except (json.JSONDecodeError, IndexError, TypeError):
+                    datos_formateados = "Datos inválidos"
+
+                fecha = r[1] if len(r) > 1 else "Sin fecha"
+
+                tree.insert("", tk.END, values=(fecha, datos_formateados))
 
             tree.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)

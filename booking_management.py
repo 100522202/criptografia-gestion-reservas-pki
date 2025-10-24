@@ -170,11 +170,13 @@ def obtener_reservas(usuario_asociado:str, password:str) -> list:
             return []
 
     reservas_usuario = []
+    # TODO: ¿ELIMINAR USUARIOS HASHEADOS?
+    usuario_hasheado = hash_functions.hash_text(usuario_asociado)
 
     for reserva in todas_las_reservas:
         try:
             # Intentamos descifrar la reserva con la función descifrar_reserva
-            datos = descifrar_reserva(usuario_asociado, password, reserva)
+            datos = descifrar_reserva(reserva, usuario_asociado, password)
             reservas_usuario.append(datos)
         except Exception:
             # Si falla (no es del usuario o datos corruptos), la ignoramos
