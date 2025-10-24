@@ -3,7 +3,7 @@ import base64
 from cryptography.hazmat.primitives.kdf.argon2 import Argon2id
 from cryptography.exceptions import InvalidKey
 
-def hash_password(password: str) -> str:
+def hash_text(password: str) -> str:
     salt = os.urandom(16)
 
     kdf = Argon2id(
@@ -21,7 +21,7 @@ def hash_password(password: str) -> str:
     # Guardamos sal + clave derivada en base64
     return base64.b64encode(salt + key).decode("utf-8")
 
-def verify_password(password: str, encoded: str) -> bool:
+def verify_hash(password: str, encoded: str) -> bool:
     try:
         data = base64.b64decode(encoded.encode("utf-8"))
         salt = data[:16]

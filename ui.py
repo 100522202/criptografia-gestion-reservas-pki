@@ -15,6 +15,7 @@ class Interfaz:
         self.root.configure(bg="#e6f2ff")  # Fondo de la ventana
 
         self.usuarios = user_management.cargar_usuarios()
+        self.login_password = None
 
         self.main_frame = tk.Frame(self.root, bg="#e6f2ff")
         self.main_frame.pack(fill=tk.BOTH, expand=True)
@@ -86,7 +87,6 @@ class Interfaz:
     def _accion_login(self):
         usuario = self.login_usuario.get().strip()
         password = self.login_password.get()
-
         if usuario == "" or password == "":
             messagebox.showwarning("Datos incompletos", "Completa usuario y contraseña")
             return
@@ -97,7 +97,7 @@ class Interfaz:
             self.login_usuario.delete(0, tk.END)
             self.login_password.delete(0, tk.END)
             # Crear nueva ventana para mostrar las reservas
-            self._mostrar_reservas(usuario)
+            self._mostrar_menu(usuario)
         else:
             messagebox.showerror("Error", mensaje)
 
@@ -126,57 +126,21 @@ class Interfaz:
         else:
             messagebox.showerror("Error", mensaje)
     
-    def _mostrar_reservas(self, usuario):
-        """Crea una nueva ventana y muestra las reservas almacenadas"""
-        ventana_reservas = tk.Toplevel(self.root)
-        ventana_reservas.title(f"Reservas de {usuario}")
-        ventana_reservas.geometry("500x400")
+    def _mostrar_menu(self, usuario):
+        """Ventana de menú de reservas con dos opciones: crear o ver"""
+        ventana_menu = tk.Toplevel(self.root)
+        ventana_menu.title(f"Opciones de reservas de {usuario}")
+        ventana_menu.geometry("300x200")
 
-        tk.Label(ventana_reservas, text=f"Reservas del usuario {usuario}", font=("Arial", 14, "bold")).pack(pady=10)
-
-        # Intentar cargar las reservas del archivo # TODO
-        reservas = booking_management.obtener_reservas(usuario, )
-
-        # Si no hay reservas, mostrar mensaje
-        if not reservas:
-            tk.Label(
-                ventana_reservas,
-                text="No hay reservas almacenadas.",
-                font=("Arial", 12)
-            ).pack(pady=20)
-        else:
-            # Crear un Treeview para mostrar las reservas
-            tree = ttk.Treeview(
-                ventana_reservas,
-                columns=("reserva", "clave", "nonce"),
-                show="headings"
-            )
-            tree.heading("reserva", text="Reserva cifrada")
-            tree.heading("clave", text="Clave AES cifrada")
-            tree.heading("nonce", text="Nonce")
-
-            # Ajustar ancho de columnas
-            tree.column("reserva", width=150)
-            tree.column("clave", width=150)
-            tree.column("nonce", width=150)
-
-            # Insertar cada reserva en la tabla
-            for r in reservas:
-                tree.insert(
-                    "",
-                    tk.END,
-                    values=(
-                        r["reserva_cifrada"][:20] + "...",
-                        r["aes_clave_cifrada"][:20] + "...",
-                        r["nonce"][:20] + "..."
-                    )
-                )
-
-            tree.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        tk.Label(
+            ventana_menu,
+            text=f"Opciones para el usuario {usuario}",
+            font=("Arial", 14, "bold")
+        ).pack(pady=20)
 
         # Botón para crear una nueva reserva
-        boton_nueva = tk.Button(
-            ventana_reservas,
+        boton_crear = tk.Button(
+            ventana_menu,
             text="Crear nueva reserva",
             font=("Arial", 12, "bold"),
             bg="#4CAF50",
@@ -185,7 +149,20 @@ class Interfaz:
             pady=5,
             command=lambda: self._abrir_crear_reserva(usuario)
         )
-        boton_nueva.pack(pady=10)
+        boton_crear.pack(pady=10)
+
+        # Botón para ver reservas
+        boton_ver = tk.Button(
+            ventana_menu,
+            text="Ver reservas",
+            font=("Arial", 12, "bold"),
+            bg="#2196F3",
+            fg="white",
+            padx=10,
+            pady=5,
+            command=lambda: self._abrir_ver_reservas(usuario)
+        )
+        boton_ver.pack(pady=10)
     
     def _abrir_crear_reserva(self, usuario):
         """Crea una ventana para introducir una nueva reserva, cifrarla y almacenarla."""
@@ -247,3 +224,51 @@ class Interfaz:
             )
         )
         boton_reservar.pack(pady=15)
+    
+    def _abrir_ver_reservas(self, usuario):
+        """Crea una ventana y muestra las reservas almacenadas"""
+        ventana_reservas = tk.Toplevel(self.root)
+        ventana_reservas.title(f"Reservas de {usuario}")
+        ventana_reservas.geometry("500x400")
+
+        tk.Label(ventana_reservas, text=f"Reservas del usuario {usuario}", font=("Arial", 14, "bold")).pack(pady=10)
+
+        # Intentar cargar las reservas del archivo
+        reservas = booking_management.obtener_reservas(usuario, self.login_password)
+
+        # Si no hay reservas, mostrar mensaje
+        if not reservas:
+            tk.Label(
+                ventana_reservas,
+                text="No hay reservas almacenadas.",
+                font=("Arial", 12)
+            ).pack(pady=20)
+        else:
+            # Crear un Treeview para mostrar las reservas
+            tree = ttk.Treeview(
+                ventana_reservas,
+                columns=("reserva", "clave", "nonce"),
+                show="headings"
+            )
+            tree.heading("reserva", text="Reserva cifrada")
+            tree.heading("clave", text="Clave AES cifrada")
+            tree.heading("nonce", text="Nonce")
+
+            # Ajustar ancho de columnas
+            tree.column("reserva", width=150)
+            tree.column("clave", width=150)
+            tree.column("nonce", width=150)
+
+            # Insertar cada reserva en la tabla
+            for r in reservas:
+                tree.insert(
+                    "",
+                    tk.END,
+                    values=(
+                        r["reserva_cifrada"][:20] + "...",
+                        r["aes_clave_cifrada"][:20] + "...",
+                        r["nonce"][:20] + "..."
+                    )
+                )
+
+            tree.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)

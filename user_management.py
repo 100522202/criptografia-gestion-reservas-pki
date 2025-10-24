@@ -1,7 +1,7 @@
 """ Funciones relacionadas con el registro de usuario"""
 import json
 import os
-import password_management
+import hash_functions
 from key_management import generar_par_claves 
 
 USUARIOS_FILE = "database/usuarios.json"
@@ -20,7 +20,7 @@ def guardar_usuarios(usuarios):
         json.dump(usuarios, f, indent=2)
 
 def registro_usuario(usuario_name, password, nombre, apellidos, correo):
-    hash_psw = password_management.hash_password(password)
+    hash_psw = hash_functions.hash_text(password)
 
     usuarios = cargar_usuarios()
 

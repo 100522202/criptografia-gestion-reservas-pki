@@ -1,6 +1,6 @@
 import json
 import os
-import password_management
+import hash_functions
 import key_management
 
 USUARIOS_FILE = "database/usuarios.json"
@@ -25,7 +25,7 @@ def login_usuario(usuario_name:str, password):
     
     hash_guardado = usuarios[usuario_name]["password_hash"]
 
-    if not password_management.verify_password(password, hash_guardado):
+    if not hash_functions.verify_hash(password, hash_guardado):
         return False, "Contraseña incorrecta"
     
     #Cargamos la clave privada del usuario

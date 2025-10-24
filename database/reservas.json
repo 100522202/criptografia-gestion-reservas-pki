@@ -1,12 +1,8 @@
 [
-    {
-        "reserva_cifrada": "jhSaQJPM6P0iwgCKHiKM4E9nxijSsiwz7m+EoI9+phaBVza/HTXpC3h2mOfYLB2R+PWXN/Oh4lC3a74/dmrhu2HnyXXPShdXR2s29OKUHX1BMymEAK9WKQg0dtLwfiuXm6M=",
-        "aes_clave_cifrada": "Dh9r7rGa35/NRfawNm9cJ8f79RBwenhDHvUkCs3yMopI+lKleDmHhp8HLNt5hyx1SloMmXrmgkcIPNLLv3PjRtHWf8WZoFx/WDjTfgEUrJg37Z0y835kVstJegmGeiDlpSqp0fjkMXp1+94P51HDS4hQPFOovfH6Q2Ux+GMtLh+SHszckzmDmP6+QRUPKYla3nOphbIKoZ8OKoRSXbSLm4bIzclDLi7uBeT6j9hai8ocN4iqyKubMFA2P6u9i5QPvUvsXnrlKDgTB3fMbV1+rovvpbe12fad857EyWhDd+b+xiBf7b6wKQ2LWi17g2Qx1/8r0KLD8RonUbrXKd9nyg==",
-        "nonce": "PZ0gonlr2VKig1IC"
-    },
-    {
-        "reserva_cifrada": "F4kS8wstJI/N8FS5t9xBEW0emx9iIECyEpyWSJRPFHdyHjsAz/rgHio/msi/ytrlaqNMQQwx0UIEe9owsmWm62FVQFwjEBH+ZEvTNsNxKYAbLLEJauGvp/Phd3A=",
-        "aes_clave_cifrada": "ApNzthWeFFNBcWdIMsPHCI8Q7xVCNToxSXpwZBV63N35pMwuq/V3M2wlTDxvhc2WtSJ49Z53FqD4rjd675pDr5BVQBIi6Hz0pcrb4a90aLKaDfrw7M1OrBrEy2otYljZJpnvS5EnjrqdGWN2aB6RZoEO67l/OeiHF93wUdqBV24WH8SA+gIYRmcE37Q4ly0bWQbu2aZIiXwZwFQqkgIJ1ydsI12u2xHfru2xEtiwLbOavMzaZA65+j9KxQjfXn2NAjEUlRPGCphzZA5kzzVRJqLVx/HkGriGJIrJWWEipCH06lINJObmXJS+EyyBOh/nPmAUOUSDpoYaG2TO7vGj4A==",
-        "nonce": "tZTK1tf33Q5ga9w8"
-    }
+  {
+    "usuario_hasheado": "8HkHWlDYdTsvxyZma+BKZDSSCJSJnd7JowoG8FUxmLxY1MK40XvWh1ppqnOIbYW+",
+    "reserva_cifrada": "YqBv2BJNHBRTUBudJf4iEBWrYH5XNa2ax3GFtQYLkXTkmL60KGE1/TvTsICwP3LjqjqDNsGZ01is8qoAUPgXr7zn3ajSuDxZYG7g3Aqk+bmE4O6b8A==",
+    "aes_clave_cifrada": "T40IpyEv17rAz5NoyLVpKVHedrWqKNj9Xu4h6otlH0y3GORzhX1QOHlXfGh94hZttTJnlhnT2LbZyKK8QPx5Xk3ZHfHGB2CNK3b0BJCJZity04Ho/K0J4IDkjYZrEkgl30aRyakuPhVS/WWBqxPEKyPgFSMdVquXQ6/X96idCF1bY0W52mQFEAcXhbp1IlYyTlivtAdpG7wymDuY4tqdYuCFrEtubzbfcvLtaMrqs8zCaUGmOVWohDCNanbisXUlBg/bNMpNhmJi3kdwu6d4BReZmj4MkxSYR+zhKrRKmauebrpQARgINbs8x+fB4dIWAAaOuqNmfepaMJje/b3WLA==",
+    "nonce": "j9f7ih24+xl/Lpq5"
+  }
 ]

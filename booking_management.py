@@ -1,5 +1,7 @@
 import os
 import json
+import hash_functions
+import key_management
 from base64 import b64encode
 from base64 import b64decode
 from tkinter import messagebox
@@ -24,6 +26,9 @@ class Booking:
         reserva cifrada, clave aes, nonce"""
         # Construimos la lista de datos
         datos_completos = [self.usuario_asociado, self.fecha_asociada, self.datos]  
+
+        # Además, guardaremos el usuario hasheado para que luego sea más fácil buscar sus reservas
+        usuario_hasheado = hash_functions.hash_text(self.usuario_asociado)
 
         # Codificamos los datos como bytes para que AES pueda usarlos
         datos_byte = json.dumps(datos_completos).encode()
@@ -57,7 +62,7 @@ class Booking:
 
         #Devolvemos un tupla con los datos cifrados y lo que necesitamos para desencriptarlos:
         #Tenemos que guardar el nonce, los datos, la clave cifrada
-        return {"reserva_cifrada":reserva_cifrada, 
+        return {"usuario_hasheado": usuario_hasheado,"reserva_cifrada":reserva_cifrada, 
                 "aes_clave_cifrada": aes_clave_cifrada, "nonce": nonce}
 
 
@@ -130,6 +135,7 @@ def almacenar_reserva(reserva_cifrada:dict, ruta_archivo:str) -> bool:
     
     # Convertir los datos a b64 para poder almacenarlos en el json
     datos_a_guardar = {
+        "usuario_hasheado": reserva_cifrada["usuario_hasheado"],
         "reserva_cifrada": bytes_a_base64(reserva_cifrada["reserva_cifrada"]),
         "aes_clave_cifrada": bytes_a_base64(reserva_cifrada["aes_clave_cifrada"]),
         "nonce": bytes_a_base64(reserva_cifrada["nonce"])
