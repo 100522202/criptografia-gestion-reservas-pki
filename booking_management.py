@@ -6,9 +6,7 @@ from base64 import b64encode
 from base64 import b64decode
 from tkinter import messagebox
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from cryptography.hazmat.primitives import serialization, hashes
-from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
 
 RESERVAS_FILE = "database/reservas.json"
 
@@ -48,44 +46,23 @@ class Booking:
 
         #Ahora debemos cifrar esta clave AES con la clave pública
 
-        #Cargamos la clave pública desde su archivo.pem
-        ruta_clave_publica = "claves/" + self.usuario_asociado + "_public.pem"
-        with open(ruta_clave_publica, "rb") as f:
-            # Convertimos a objeto de clave pública
-            clave_publica = serialization.load_pem_public_key(f.read())
+        #Cargamos la clave pública desde su archivo.pem usando key_management
+        clave_publica = key_management.cargar_clave_publica(self.usuario_asociado)
+        aes_clave_cifrada = key_management.rsa_oaep_encrypt(clave_publica, aes_clave)
 
-        # Ciframos la clave AES con la clave pública (RSA) del usuario
-        aes_clave_cifrada = clave_publica.encrypt(aes_clave,padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()), 
-            algorithm=hashes.SHA256(),label=None))
-        
         # Cargamos también la clave pública del administrador
-        ruta_clave_publica_admin = "claves/admin_public.pem"
-        with open(ruta_clave_publica_admin, "rb") as f:
-            clave_publica_admin = serialization.load_pem_public_key(f.read())
-
-        # Ciframos la misma clave AES con la clave pública del administrador
-        aes_clave_cifrada_admin = clave_publica_admin.encrypt(
-            aes_clave,
-            padding.OAEP(
-                mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                algorithm=hashes.SHA256(),
-                label=None
-            )
-        )
+        clave_publica_admin = key_management.cargar_clave_publica("admin")
+        aes_clave_cifrada_admin = key_management.rsa_oaep_encrypt(clave_publica_admin, aes_clave)
 
         # Ciframos también el nombre del usuario con la clave pública del admin para mantener la privacidad
-        usuario_cifrado_admin = clave_publica_admin.encrypt(
-            self.usuario_asociado.encode(),
-            padding.OAEP(
-                mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                algorithm=hashes.SHA256(),
-                label=None
-            )
+        usuario_cifrado_admin = key_management.rsa_oaep_encrypt(
+            clave_publica_admin,
+            self.usuario_asociado.encode()
         )
 
-        #Devolvemos un tupla con los datos cifrados y lo que necesitamos para desencriptarlos:
-        #Tenemos que guardar el nonce, los datos, la clave cifrada
+        #Devolvemos una tupla con los datos cifrados y lo necesario para descifrarlos
+        #Guardamos el nonce, los datos y las claves cifradas
+
         return {"usuario_hasheado": usuario_hasheado,"reserva_cifrada":reserva_cifrada, 
                 "aes_clave_cifrada": aes_clave_cifrada, "aes_clave_cifrada_admin": aes_clave_cifrada_admin, 
                 "nonce": nonce, "usuario_original_cifrado": usuario_cifrado_admin}
@@ -114,14 +91,8 @@ def descifrar_reserva(reserva: dict, usuario_name: str, password: str) -> dict:
     - password (str): Contraseña del usuario para desbloquear su clave privada.
     """
 
-    # Cargar la clave privada del usuario
-    ruta_clave_privada = f"claves/{usuario_name}_private.pem"
-    with open(ruta_clave_privada, "rb") as f:
-        clave_privada = serialization.load_pem_private_key(
-            f.read(),
-            password=password.encode(),
-            backend=default_backend()
-        )
+    # Cargar la clave privada del usuario con key_management
+    clave_privada = key_management.cargar_clave_privada(usuario_name, password)
 
     # Seleccionamos qué clave cifrada usar dependiendo del usuario:
     # si el usuario es "admin", usamos la clave AES cifrada con la pública del admin,
@@ -132,14 +103,7 @@ def descifrar_reserva(reserva: dict, usuario_name: str, password: str) -> dict:
         aes_clave_cifrada_bytes = b64decode(reserva["aes_clave_cifrada"])
 
     # Descifrar la clave AES 
-    clave_aes = clave_privada.decrypt(
-        aes_clave_cifrada_bytes,
-        padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None
-        )
-    )
+    clave_aes = key_management.rsa_oaep_decrypt(clave_privada, aes_clave_cifrada_bytes)
 
     # Descifrar la reserva con AES-GCM 
     aesgcm = AESGCM(clave_aes)
@@ -151,14 +115,7 @@ def descifrar_reserva(reserva: dict, usuario_name: str, password: str) -> dict:
             raise ValueError("Reserva sin información de titular para descifrado por admin.")
 
         usuario_cifrado = b64decode(usuario_cifrado_b64)
-        usuario_asociado_bytes = clave_privada.decrypt(
-            usuario_cifrado,
-            padding.OAEP(
-                mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                algorithm=hashes.SHA256(),
-                label=None
-            )
-        )
+        usuario_asociado_bytes = key_management.rsa_oaep_decrypt(clave_privada, usuario_cifrado)
         usuario_asociado = usuario_asociado_bytes.decode()
     else:
         usuario_asociado = usuario_name

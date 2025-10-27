@@ -62,5 +62,13 @@
     "correo_electronico": "admin@hotel.com",
     "password_hash": "x7VgaiL10dZZvAKueC+1DN58EpZflBIn2yizq7H9mtsyodabUG01ADfTGIFa3dgT",
     "rol": "admin"
+  },
+  "v": {
+    "rol": "usuario_comun",
+    "usuario_name": "v",
+    "password_hash": "9cQYvH/WOn4WRk9PEcTJPnWUtMeOxo1pUkWohrVmuu45JmzDd5XDyU6mO/v+D9F8",
+    "nombre": "v",
+    "apellidos": "v",
+    "correo_electronico": "v"
   }
 }

@@ -1,6 +1,6 @@
 import os
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.backends import default_backend
 
 CARPETA_CLAVES = "claves"
@@ -81,3 +81,41 @@ def cargar_clave_privada(usuario_name: str, password: str):
         )
 
     return clave_privada
+
+def cargar_clave_publica(usuario_name: str):
+    """
+    Carga la clave pública RSA del usuario desde su archivo .pem.
+    Retorna el objeto clave pública si tiene éxito, o lanza una excepción si falla.
+    """
+    ruta_clave = f"claves/{usuario_name}_public.pem"
+    
+    with open(ruta_clave, "rb") as f:
+        clave_publica = serialization.load_pem_public_key(
+            f.read(),
+            backend=default_backend()
+        )
+    
+    return clave_publica
+
+def rsa_oaep_encrypt(clave_publica, datos: bytes) -> bytes:
+    """Cifra datos con RSA-OAEP usando SHA-256."""
+    return clave_publica.encrypt(
+        datos,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+
+
+def rsa_oaep_decrypt(clave_privada, datos_cifrados: bytes) -> bytes:
+    """Descifra datos con RSA-OAEP usando SHA-256."""
+    return clave_privada.decrypt(
+        datos_cifrados,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )

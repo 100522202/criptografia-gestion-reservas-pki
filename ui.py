@@ -167,9 +167,6 @@ class Interfaz:
     
     def _abrir_crear_reserva(self, usuario, password):
         """Crea una ventana para introducir una nueva reserva, cifrarla y almacenarla."""
-        #
-        print("usuario:", usuario, "contraseña", password)
-        #
         ventana_crear = tk.Toplevel(self.root)
         ventana_crear.title(f"Nueva reserva - {usuario}")
         ventana_crear.geometry("400x500")
@@ -239,12 +236,6 @@ class Interfaz:
 
         # Intentar cargar las reservas del archivo
         reservas = booking_management.obtener_reservas(usuario, password)
-
-        #
-        print("usuario:", usuario, "contraseña", password)
-        print(reservas)
-        #
-
         # Si no hay reservas, mostrar mensaje
         if not reservas:
             tk.Label(
