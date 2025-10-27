@@ -46,5 +46,21 @@
     "nombre": "x",
     "apellidos": "x",
     "correo_electronico": "x"
+  },
+  "b": {
+    "rol": "usuario_comun",
+    "usuario_name": "b",
+    "password_hash": "04/+z+sOKzl8X9orZhPLvCmATRMCww4bFnBp+7l95qtXn5x95N175Hj22IvMGnJx",
+    "nombre": "b",
+    "apellidos": "b",
+    "correo_electronico": "b"
+  },
+  "admin": {
+    "usuario_name": "admin",
+    "nombre": "Administrador",
+    "apellidos": "",
+    "correo_electronico": "admin@hotel.com",
+    "password_hash": "x7VgaiL10dZZvAKueC+1DN58EpZflBIn2yizq7H9mtsyodabUG01ADfTGIFa3dgT",
+    "rol": "admin"
   }
 }
