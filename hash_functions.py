@@ -1,5 +1,6 @@
 import os
 import base64
+import hashlib
 from cryptography.hazmat.primitives.kdf.argon2 import Argon2id
 from cryptography.exceptions import InvalidKey
 
@@ -69,3 +70,13 @@ def verify_hash(text: str, encoded: str) -> bool:
         return True
     except InvalidKey:
         return False
+
+
+def stable_hash(text: str) -> str:
+    """
+    Genera un identificador determinista basado en SHA-256 del texto dado.
+
+    Se emplea para etiquetar datos de manera consistente sin exponer el texto original.
+    """
+    digest = hashlib.sha256(text.encode("utf-8")).digest()
+    return base64.b64encode(digest).decode("utf-8")

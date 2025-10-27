@@ -27,8 +27,8 @@ class Booking:
         # Construimos la lista de datos
         datos_completos = [self.usuario_asociado, self.fecha_asociada, self.datos]  
 
-        # Además, guardaremos el usuario hasheado para que luego sea más fácil buscar sus reservas
-        usuario_hasheado = hash_functions.hash_text(self.usuario_asociado)
+        # Etiquetamos al titular con un hash determinista. Se usa para buscar reservas sin probar todas.
+        usuario_tag = hash_functions.stable_hash(self.usuario_asociado)
 
         # Codificamos los datos como bytes para que AES pueda usarlos
         datos_byte = json.dumps(datos_completos).encode()
@@ -59,11 +59,34 @@ class Booking:
             mgf=padding.MGF1(algorithm=hashes.SHA256()), 
             algorithm=hashes.SHA256(),label=None))
         
+        # Cargamos también la clave pública del administrador
+        ruta_clave_publica_admin = "claves/admin_public.pem"
+        with open(ruta_clave_publica_admin, "rb") as f:
+            clave_publica_admin = serialization.load_pem_public_key(f.read())
+
+        # Ciframos la misma clave AES con la clave pública del administrador
+        aes_clave_cifrada_admin = clave_publica_admin.encrypt(
+            aes_clave,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+        # --- FIN NUEVO ---
 
         #Devolvemos un tupla con los datos cifrados y lo que necesitamos para desencriptarlos:
         #Tenemos que guardar el nonce, los datos, la clave cifrada
-        return {"usuario_hasheado": usuario_hasheado,"reserva_cifrada":reserva_cifrada, 
-                "aes_clave_cifrada": aes_clave_cifrada, "nonce": nonce}
+        # --- MODIFICADO ---
+        # Ahora devolvemos también la clave cifrada del admin dentro de un diccionario
+        return {
+            "usuario_tag": usuario_tag,
+            "reserva_cifrada": reserva_cifrada, 
+            "aes_clave_cifrada": aes_clave_cifrada,  # sigue siendo la del usuario
+            "aes_clave_cifrada_admin": aes_clave_cifrada_admin,  # nueva entrada para el admin
+            "nonce": nonce,
+            "usuario_original": self.usuario_asociado
+        }
 
 
 
@@ -98,8 +121,15 @@ def descifrar_reserva(reserva: dict, usuario_name: str, password: str) -> dict:
             backend=default_backend()
         )
 
+    # Seleccionamos qué clave cifrada usar dependiendo del usuario:
+    # si el usuario es "admin", usamos la clave AES cifrada con la pública del admin,
+    # en caso contrario, usamos la clave cifrada con la pública del usuario.
+    if usuario_name == "admin" and "aes_clave_cifrada_admin" in reserva:
+        aes_clave_cifrada_bytes = base64_a_bytes(reserva["aes_clave_cifrada_admin"])
+    else:
+        aes_clave_cifrada_bytes = base64_a_bytes(reserva["aes_clave_cifrada"])
+
     # Descifrar la clave AES 
-    aes_clave_cifrada_bytes = b64decode(reserva["aes_clave_cifrada"])
     clave_aes = clave_privada.decrypt(
         aes_clave_cifrada_bytes,
         padding.OAEP(
@@ -111,9 +141,16 @@ def descifrar_reserva(reserva: dict, usuario_name: str, password: str) -> dict:
 
     # Descifrar la reserva con AES-GCM 
     aesgcm = AESGCM(clave_aes)
-    nonce = b64decode(reserva["nonce"])
-    reserva_cifrada_bytes = b64decode(reserva["reserva_cifrada"])
-    usuario_bytes = usuario_name.encode()
+    nonce = base64_a_bytes(reserva["nonce"])
+    reserva_cifrada_bytes = base64_a_bytes(reserva["reserva_cifrada"])
+    if usuario_name == "admin":
+        usuario_asociado = reserva.get("usuario_original")
+        if not usuario_asociado:
+            raise ValueError("Reserva sin información de titular para descifrado por admin.")
+    else:
+        usuario_asociado = usuario_name
+
+    usuario_bytes = usuario_asociado.encode()
 
     datos_descifrados_bytes = aesgcm.decrypt(
         nonce,
@@ -124,6 +161,7 @@ def descifrar_reserva(reserva: dict, usuario_name: str, password: str) -> dict:
     # Convertir bytes a datos originales
     datos_descifrados = json.loads(datos_descifrados_bytes.decode("utf-8"))
     return datos_descifrados
+
     
 def almacenar_reserva(reserva_cifrada:dict, ruta_archivo:str) -> bool:
     """Método que almacena una reserva cifrada en una ruta especificada
@@ -135,10 +173,12 @@ def almacenar_reserva(reserva_cifrada:dict, ruta_archivo:str) -> bool:
     
     # Convertir los datos a b64 para poder almacenarlos en el json
     datos_a_guardar = {
-        "usuario_hasheado": reserva_cifrada["usuario_hasheado"],
+        "usuario_tag": reserva_cifrada["usuario_tag"],
         "reserva_cifrada": bytes_a_base64(reserva_cifrada["reserva_cifrada"]),
         "aes_clave_cifrada": bytes_a_base64(reserva_cifrada["aes_clave_cifrada"]),
-        "nonce": bytes_a_base64(reserva_cifrada["nonce"])
+        "aes_clave_cifrada_admin": bytes_a_base64(reserva_cifrada["aes_clave_cifrada_admin"]),
+        "nonce": bytes_a_base64(reserva_cifrada["nonce"]),
+        "usuario_original": reserva_cifrada["usuario_original"]
     }
 
     # Si el archivo existe, leemos el contenido para añadir la nueva reserva
@@ -169,32 +209,51 @@ def obtener_reservas(usuario_asociado:str, password:str) -> list:
         except json.JSONDecodeError:
             return []
 
+    es_admin = usuario_asociado == "admin"
+    objetivo_tag = None if es_admin else hash_functions.stable_hash(usuario_asociado)
+
     reservas_usuario = []
-    # TODO: ¿ELIMINAR USUARIOS HASHEADOS?
-    usuario_hasheado = hash_functions.hash_text(usuario_asociado)
 
     for reserva in todas_las_reservas:
+        # Filtramos por el hash determinista; solo el admin recorre todas.
+        if not es_admin and reserva.get("usuario_tag") != objetivo_tag:
+            continue
+
         try:
-            # Intentamos descifrar la reserva con la función descifrar_reserva
             datos = descifrar_reserva(reserva, usuario_asociado, password)
             reservas_usuario.append(datos)
         except Exception:
-            # Si falla (no es del usuario o datos corruptos), la ignoramos
+            # Datos corruptos o credenciales incorrectas: ignoramos la entrada.
             continue
 
     return reservas_usuario
 
 def is_encrypted(reserva: dict):
-     """Devuelve True si una reserva está cifrada, False eoc."""
-     if not isinstance(reserva, dict):
-          return False
-     if not("reserva_cifrada" in reserva and "aes_clave_cifrada" in reserva and "nonce" in reserva):
-          return False
-     return True
+    """Devuelve True si una reserva está cifrada, False eoc."""
+    if not isinstance(reserva, dict):
+        return False
+    required_keys = {
+        "reserva_cifrada",
+        "aes_clave_cifrada",
+        "aes_clave_cifrada_admin",
+        "nonce",
+        "usuario_original",
+        "usuario_tag"
+    }
+    if not required_keys.issubset(reserva):
+        return False
+    return True
 
 def bytes_a_base64(data: bytes) -> str:
     """Convierte bytes a string en Base64."""
     return b64encode(data).decode()
+
+
+def base64_a_bytes(data) -> bytes:
+    """Convierte un string/base64 bytes en bytes puros, o devuelve si ya lo es."""
+    if isinstance(data, bytes):
+        return data
+    return b64decode(data)
 
 def guardar_reserva(usuario, email, telefono, dni, fecha, ventana_crear):
     """Guarda una nueva reserva cifrada en el archivo JSON."""
