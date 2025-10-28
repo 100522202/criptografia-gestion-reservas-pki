@@ -70,5 +70,21 @@
     "nombre": "v",
     "apellidos": "v",
     "correo_electronico": "v"
+  },
+  "s": {
+    "rol": "usuario_comun",
+    "usuario_name": "s",
+    "password_hash": "6vpDUK4WNZiF/zw5OMe1vrap7RJlYTRmYYbGL1zLiJ57XfhvU7ULVm9yOVYv4w8w",
+    "nombre": "s",
+    "apellidos": "s",
+    "correo_electronico": "s"
+  },
+  "k": {
+    "rol": "usuario_comun",
+    "usuario_name": "k",
+    "password_hash": "zZvkufjV1EUoFhHej+W+bKz8nbXiOKVXQCZbjy+MxhpbowX1DzFC+uQ/2MbFhLjD",
+    "nombre": "k",
+    "apellidos": "k",
+    "correo_electronico": "k"
   }
 }

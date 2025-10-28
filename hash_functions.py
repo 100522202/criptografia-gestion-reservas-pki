@@ -33,7 +33,11 @@ def hash_text(password: str) -> str:
     key = kdf.derive(password.encode())
 
     # Guardamos sal + clave derivada en base64
-    return base64.b64encode(salt + key).decode("utf-8")
+    encoded = base64.b64encode(salt + key).decode("utf-8")
+    print(
+        f"[DEBUG] hash_functions: Argon2id hash generado (memoria=32MB, iteraciones=2, salida={len(key)} bytes, salt={len(salt)} bytes)."
+    )
+    return encoded
 
 def verify_hash(text: str, encoded: str) -> bool:
     """
@@ -50,6 +54,8 @@ def verify_hash(text: str, encoded: str) -> bool:
     Returns:
         bool: True si la contraseña es correcta, False si no coincide.
     """
+    salt = b""
+    stored_key = b""
     try:
         data = base64.b64decode(encoded.encode("utf-8"))
         salt = data[:16]
@@ -67,8 +73,12 @@ def verify_hash(text: str, encoded: str) -> bool:
 
         # Esta línea lanza InvalidKey si la verificación falla
         kdf.verify(text.encode(), stored_key)
+        print(
+            f"[DEBUG] hash_functions: Argon2id verificación correcta (memoria=32MB, iteraciones=2, salida={len(stored_key)} bytes, salt={len(salt)} bytes)."
+        )
         return True
     except InvalidKey:
+        print("[WARNING] hash_functions: Verificación Argon2id fallida (entrada no coincide).")
         return False
 
 
@@ -79,4 +89,5 @@ def stable_hash(text: str) -> str:
     Se emplea para etiquetar datos de manera consistente sin exponer el texto original.
     """
     digest = hashlib.sha256(text.encode("utf-8")).digest()
+    print("[DEBUG] hash_functions: SHA-256 estable generado (salida=256 bits).")
     return base64.b64encode(digest).decode("utf-8")

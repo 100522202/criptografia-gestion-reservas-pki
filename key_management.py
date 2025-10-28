@@ -33,7 +33,7 @@ def generar_clave_publica(clave_privada):
         encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo
     )
-    
+
     return public_pem
 
 def generar_par_claves(usuario_name:str, password:str):
@@ -79,7 +79,6 @@ def cargar_clave_privada(usuario_name: str, password: str):
             password=password.encode(),
             backend=default_backend()
         )
-
     return clave_privada
 
 def cargar_clave_publica(usuario_name: str):
@@ -94,12 +93,11 @@ def cargar_clave_publica(usuario_name: str):
             f.read(),
             backend=default_backend()
         )
-    
     return clave_publica
 
 def rsa_oaep_encrypt(clave_publica, datos: bytes) -> bytes:
     """Cifra datos con RSA-OAEP usando SHA-256."""
-    return clave_publica.encrypt(
+    ciphertext = clave_publica.encrypt(
         datos,
         padding.OAEP(
             mgf=padding.MGF1(algorithm=hashes.SHA256()),
@@ -107,11 +105,12 @@ def rsa_oaep_encrypt(clave_publica, datos: bytes) -> bytes:
             label=None
         )
     )
+    return ciphertext
 
 
 def rsa_oaep_decrypt(clave_privada, datos_cifrados: bytes) -> bytes:
     """Descifra datos con RSA-OAEP usando SHA-256."""
-    return clave_privada.decrypt(
+    plaintext = clave_privada.decrypt(
         datos_cifrados,
         padding.OAEP(
             mgf=padding.MGF1(algorithm=hashes.SHA256()),
@@ -119,3 +118,4 @@ def rsa_oaep_decrypt(clave_privada, datos_cifrados: bytes) -> bytes:
             label=None
         )
     )
+    return plaintext
