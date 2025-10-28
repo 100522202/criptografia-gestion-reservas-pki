@@ -5,8 +5,12 @@ import key_management
 from base64 import b64encode
 from base64 import b64decode
 from tkinter import messagebox
+from typing import Optional
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives import hashes
+from security_utils import get_logger
+
+logger = get_logger(__name__)
 
 RESERVAS_FILE = "database/reservas.json"
 
@@ -40,25 +44,40 @@ class Booking:
 
         #Generamos un nonce de 12 bytes (semilla única para cada cifrado)
         nonce = os.urandom(12)
+        logger.debug(
+            "Preparando cifrado reserva con AES-GCM (clave simétrica=256 bits, nonce=%d bytes, datos=%d bytes).",
+            len(nonce),
+            len(datos_byte),
+        )
 
         #Ciframos los datos de la reserva con AES-GCM: solo será válida para el usuario asociado: AUTENTICACIÓN
         reserva_cifrada = aesgcm.encrypt(nonce, datos_byte, associated_data=usuario_bytes)
+        logger.debug(
+            "Reserva cifrada con AES-GCM: ciphertext=%d bytes, etiqueta integrada=128 bits.",
+            len(reserva_cifrada),
+        )
 
         #Ahora debemos cifrar esta clave AES con la clave pública
 
         #Cargamos la clave pública desde su archivo.pem usando key_management
         clave_publica = key_management.cargar_clave_publica(self.usuario_asociado)
         aes_clave_cifrada = key_management.rsa_oaep_encrypt(clave_publica, aes_clave)
+        logger.debug(
+            "Clave AES generada protegida con RSA-OAEP (2048 bits) para usuario %s.",
+            self.usuario_asociado,
+        )
 
         # Cargamos también la clave pública del administrador
         clave_publica_admin = key_management.cargar_clave_publica("admin")
         aes_clave_cifrada_admin = key_management.rsa_oaep_encrypt(clave_publica_admin, aes_clave)
+        logger.debug("Clave AES replicada para admin mediante RSA-OAEP (2048 bits).")
 
         # Ciframos también el nombre del usuario con la clave pública del admin para mantener la privacidad
         usuario_cifrado_admin = key_management.rsa_oaep_encrypt(
             clave_publica_admin,
             self.usuario_asociado.encode()
         )
+        logger.debug("Identidad del usuario protegida para admin via RSA-OAEP (2048 bits).")
 
         #Devolvemos una tupla con los datos cifrados y lo necesario para descifrarlos
         #Guardamos el nonce, los datos y las claves cifradas
@@ -69,7 +88,12 @@ class Booking:
 
 
 
-def descifrar_reserva(reserva: dict, usuario_name: str, password: str) -> dict:
+def descifrar_reserva(
+    reserva: dict,
+    usuario_name: str,
+    password: str,
+    clave_privada: Optional[object] = None,
+) -> dict:
     """
     Descifra una reserva cifrada con el esquema híbrido AES-GCM + RSA. Para ello,
     carga la clave privada del usuario, descifra el AES, descifra el contenido
@@ -89,10 +113,12 @@ def descifrar_reserva(reserva: dict, usuario_name: str, password: str) -> dict:
         - "nonce": str (Base64 del nonce de AES-GCM)
     - usuario_name (str): Nombre de usuario asociado a la reserva.
     - password (str): Contraseña del usuario para desbloquear su clave privada.
+    - clave_privada (opcional): Objeto de clave privada RSA ya cargado para evitar recargas.
     """
 
-    # Cargar la clave privada del usuario con key_management
-    clave_privada = key_management.cargar_clave_privada(usuario_name, password)
+    # Cargar la clave privada del usuario con key_management solo si no se proporcionó
+    if clave_privada is None:
+        clave_privada = key_management.cargar_clave_privada(usuario_name, password)
 
     # Seleccionamos qué clave cifrada usar dependiendo del usuario:
     # si el usuario es "admin", usamos la clave AES cifrada con la pública del admin,
@@ -117,6 +143,7 @@ def descifrar_reserva(reserva: dict, usuario_name: str, password: str) -> dict:
         usuario_cifrado = b64decode(usuario_cifrado_b64)
         usuario_asociado_bytes = key_management.rsa_oaep_decrypt(clave_privada, usuario_cifrado)
         usuario_asociado = usuario_asociado_bytes.decode()
+        logger.debug("Descifrado del titular de la reserva con RSA-OAEP utilizando clave de admin.")
     else:
         usuario_asociado = usuario_name
 
@@ -126,6 +153,9 @@ def descifrar_reserva(reserva: dict, usuario_name: str, password: str) -> dict:
         nonce,
         reserva_cifrada_bytes,
         associated_data=usuario_bytes
+    )
+    logger.debug(
+        "Reserva descifrada con AES-GCM (clave 256 bits). Etiqueta de autenticación válida.",
     )
 
     # Convertir bytes a datos originales
@@ -165,6 +195,12 @@ def almacenar_reserva(reserva_cifrada:dict, ruta_archivo:str) -> bool:
     # Guardar de nuevo
     with open(ruta_archivo, "w") as f:
         json.dump(todas_las_reservas, f, indent=4)
+    logger.info(
+        "Reserva cifrada almacenada (ciphertext=%d bytes, nonce=%d bytes, usuario_hasheado=%s).",
+        len(reserva_cifrada["reserva_cifrada"]),
+        len(reserva_cifrada["nonce"]),
+        reserva_cifrada["usuario_hasheado"],
+    )
 
     return True
 
@@ -185,15 +221,34 @@ def obtener_reservas(usuario_asociado:str, password:str) -> list:
         return obtener_todas_reservas("admin", password)
 
     reservas_usuario = []
+    clave_privada_usuario = None
     for reserva in todas_las_reservas:
         try:
             usuario_hasheado_guardado = reserva.get("usuario_hasheado")
             if not usuario_hasheado_guardado:
                 continue
-            if not hash_functions.verify_hash(usuario_asociado, usuario_hasheado_guardado):
+            coincide = hash_functions.verify_hash(usuario_asociado, usuario_hasheado_guardado)
+            logger.debug(
+                "Comparación Argon2id para usuario %s -> %s.",
+                usuario_asociado,
+                "válida" if coincide else "inválida",
+            )
+            if not coincide:
                 continue
-            datos = descifrar_reserva(reserva, usuario_asociado, password)
+            if clave_privada_usuario is None:
+                clave_privada_usuario = key_management.cargar_clave_privada(usuario_asociado, password)
+            datos = descifrar_reserva(
+                reserva,
+                usuario_asociado,
+                password,
+                clave_privada=clave_privada_usuario,
+            )
             reservas_usuario.append(datos)
+            logger.debug(
+                "Reserva asociada a %s descifrada correctamente (campos: %s).",
+                usuario_asociado,
+                list(datos.keys()) if isinstance(datos, dict) else "lista",
+            )
         except Exception:
             continue
 
@@ -215,9 +270,17 @@ def obtener_todas_reservas(usuario_admin: str, password_admin: str) -> list:
             return []
 
     resultado = []
+    clave_privada_admin_cache = None
     for reserva in todas_las_reservas:
         try:
-            datos = descifrar_reserva(reserva, "admin", password_admin)
+            if clave_privada_admin_cache is None:
+                clave_privada_admin_cache = key_management.cargar_clave_privada("admin", password_admin)
+            datos = descifrar_reserva(
+                reserva,
+                "admin",
+                password_admin,
+                clave_privada=clave_privada_admin_cache,
+            )
             resultado.append(datos)
         except Exception:
             continue
