@@ -28,8 +28,5 @@ def login_usuario(usuario_name:str, password):
     if not hash_functions.verify_hash(password, hash_guardado):
         return False, "Contraseña incorrecta"
     
-    #Cargamos la clave privada del usuario
-    # TODO: no se el que???
-    clave_privada = key_management.cargar_clave_privada(usuario_name, password)
     rol = usuarios[usuario_name]["rol"]
     return True, f"Bienvenido, {usuario_name}. Rol: {rol}"

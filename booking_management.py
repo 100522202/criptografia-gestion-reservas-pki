@@ -249,7 +249,6 @@ def obtener_reservas(usuario_asociado:str, password:str) -> list:
 
     return reservas_usuario
 
-
 def obtener_todas_reservas(usuario_admin: str, password_admin: str) -> list:
     """Devuelve todas las reservas descifradas usando la clave del admin."""
     if usuario_admin != "admin":
