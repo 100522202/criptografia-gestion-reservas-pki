@@ -86,5 +86,13 @@
     "nombre": "k",
     "apellidos": "k",
     "correo_electronico": "k"
+  },
+  "r": {
+    "rol": "usuario_comun",
+    "usuario_name": "r",
+    "password_hash": "q/aRKwHXjaPD9U2tAKjcgYVAJQ7LV0cA7Y5OKtn6RLevloMFfA4aPKYcGYJoKbEa",
+    "nombre": "r",
+    "apellidos": "r",
+    "correo_electronico": "r"
   }
 }

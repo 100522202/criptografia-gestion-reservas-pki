@@ -217,6 +217,7 @@ class Interfaz:
             pady=5,
             command=lambda: booking_management.guardar_reserva(
                 usuario,
+                password,
                 entry_email.get().strip(),
                 entry_telefono.get().strip(),
                 entry_dni.get().strip(),

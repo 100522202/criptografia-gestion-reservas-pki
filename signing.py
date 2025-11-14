@@ -38,7 +38,7 @@ def verificar_firma(clave_publica, reserva, firma: bytes) -> bool:
             mensaje,
             padding.PSS(
                 mgf = padding.MGF1(hashes.SHA256()),
-                salt_length=padding.PSS_MAX_LENGTH
+                salt_length=padding.PSS.MAX_LENGTH
             ),
             hashes.SHA256()
         )
