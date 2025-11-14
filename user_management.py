@@ -70,7 +70,6 @@ def crear_admin_seguro():
 
 
 
-# TODO: CIFRAR USUARIOS ANTES DE GUARDARLOS, DESCIFRAR SI QUEREMOS OBTENER SU INFO
 def cargar_usuarios():
     if not os.path.exists(USUARIOS_FILE):
         return {}
