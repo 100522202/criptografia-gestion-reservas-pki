@@ -1,11 +1,13 @@
 """ Funciones relacionadas con el registro de usuario"""
 import json
 import os
+import certificate_management as cm
 import tkinter as tk
 from tkinter import simpledialog, messagebox
 import hash_functions
 from hash_functions import hash_text
-from key_management import generar_par_claves
+from key_management import generar_par_claves, cargar_clave_privada
+
 
 
 USUARIOS_FILE = "database/usuarios.json"
@@ -101,6 +103,31 @@ def registro_usuario(usuario_name, password, nombre, apellidos, correo):
     }
 
     generar_par_claves(usuario_name, password)
+    clave_privada_usuario = cargar_clave_privada(usuario_name, password)
+    #TODO: ¿Luego hay que borrar clave publica.pem?
+
+    # Generamos el csr
+    csr_usuario = cm.generar_csr_usuario(usuario_name, nombre, apellidos,correo, clave_privada_usuario)
+
+    
+    if csr_usuario:
+        # Lo guardamos
+        cm.guardar_csr(usuario_name,csr_usuario)
+    """ Otro copia/pega barato
+    # 5. *** FIRMAR EL CSR CON LA CA ***
+        certificado_usuario_pem = firmar_csr_usuario(csr_pem, usuario_name) 
+
+        if certificado_usuario_pem is None:
+            return False, "Error al firmar el CSR con la CA."
+
+        # Opcional: Podrías guardar el certificado_usuario_pem en la estructura de 'usuarios'
+        usuarios[usuario_name]["certificado"] = certificado_usuario_pem.decode('utf-8')
+        
+        guardar_usuarios(usuarios)
+        return True, "Usuario registrado, claves, CSR y certificado generados correctamente."
+    else:
+        return False, "Error al generar la CSR."""
+
     guardar_usuarios(usuarios)
 
     #Protegemos que otros usuarios no puedan acceder a la informacion de otros en disco

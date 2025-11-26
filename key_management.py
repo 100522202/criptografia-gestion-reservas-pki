@@ -82,6 +82,7 @@ def cargar_clave_privada(usuario_name: str, password: str):
     return clave_privada
 
 def cargar_clave_publica(usuario_name: str):
+    # TODO: HABRÁ QUE ELIMINAR TODAS LAS LLAMADAS A ESTA FUNCIÓN Y OBTENER LA CLAVE PÚBLICA DEL CERTIFICADO DIRECTAMENTE
     """
     Carga la clave pública RSA del usuario desde su archivo .pem.
     Retorna el objeto clave pública si tiene éxito, o lanza una excepción si falla.
