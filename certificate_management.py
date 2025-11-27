@@ -177,11 +177,12 @@ def firmar_csr_usuario(csr_pem:bytes, usuario_name:str):
             digital_signature=True, # Permite usar la clave para crear firmas digitales (para TLS)
             key_encipherment=True, # Permite usar la clave para cifrar otras claves
             data_encipherment=False, # Prohibimos usar esta clave directamente para cifrar datos de la aplicación
-            non_repudiation=False, # Prohibimos usar esta clave para la no-repudiación (para probar autoría legalmente)
+            content_commitment=False, # Prohibimos usar esta clave para la no-repudiación (para probar autoría legalmente)
             key_cert_sign=False, # NO es una CA -> prohibimos que firme otros certificados
             crl_sign=False, # Prohibimos que este certificado se use para firmar Listas de Revocación (CRL)
             encipher_only=False, # No se permite usar la clave solo para cifrar en condiciones especiales.
-            decipher_only=False # No se permite usar la clave solo para descifrar en condiciones especiales.
+            decipher_only=False, # No se permite usar la clave solo para descifrar en condiciones especiales.
+            key_agreement=False # No permitimos intercambiar material criptográfico
         ),
         critical=True # También debe ser crítica.
     )

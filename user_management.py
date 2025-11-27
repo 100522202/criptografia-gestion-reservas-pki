@@ -103,6 +103,14 @@ def registro_usuario(usuario_name, password, nombre, apellidos, correo):
     }
 
     generar_par_claves(usuario_name, password)
+
+    #Protegemos que otros usuarios no puedan acceder a la informacion de otros en disco
+    try:
+        os.chmod(f"claves/{usuario_name}_private.pem", 0o600)
+        os.chmod(f"claves/{usuario_name}_public.pem", 0o644)
+    except Exception:
+        pass  # Ignorar en Windows
+
     clave_privada_usuario = cargar_clave_privada(usuario_name, password)
     #TODO: CREO QUE Luego hay que borrar clave publica.pem
 
@@ -113,28 +121,17 @@ def registro_usuario(usuario_name, password, nombre, apellidos, correo):
     if csr_usuario:
         # Lo guardamos
         cm.guardar_csr(usuario_name,csr_usuario)
-    """ Otro copia/pega barato
-    # 5. *** FIRMAR EL CSR CON LA CA ***
-        certificado_usuario_pem = firmar_csr_usuario(csr_pem, usuario_name) 
+    
+        # 5. *** FIRMAR EL CSR CON LA CA ***
+        certificado_usuario_pem = cm.firmar_csr_usuario(csr_usuario, usuario_name) 
 
         if certificado_usuario_pem is None:
             return False, "Error al firmar el CSR con la CA."
 
-        # Opcional: Podrías guardar el certificado_usuario_pem en la estructura de 'usuarios'
-        usuarios[usuario_name]["certificado"] = certificado_usuario_pem.decode('utf-8')
+        # TODO: Opcional: ¿guardar el certificado_usuario_pem en la estructura de 'usuarios'?
+        # usuarios[usuario_name]["certificado"] = certificado_usuario_pem.decode('utf-8')
         
         guardar_usuarios(usuarios)
         return True, "Usuario registrado, claves, CSR y certificado generados correctamente."
     else:
-        return False, "Error al generar la CSR."""
-
-    guardar_usuarios(usuarios)
-
-    #Protegemos que otros usuarios no puedan acceder a la informacion de otros en disco
-    try:
-        os.chmod(f"claves/{usuario_name}_private.pem", 0o600)
-        os.chmod(f"claves/{usuario_name}_public.pem", 0o644)
-    except Exception:
-        pass  # Ignorar en Windows
-
-    return True, "Usuario registrado correctamente."
+        return False, "Error al generar la CSR."

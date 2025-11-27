@@ -102,5 +102,13 @@
     "nombre": "as",
     "apellidos": "as",
     "correo_electronico": "as"
+  },
+  "test": {
+    "rol": "usuario_comun",
+    "usuario_name": "test",
+    "password_hash": "aGctRabpia/5h8u9Rwpj732Sn6L/bsPuXZ1pV+r3N4zj3hd6Rrtg+0D4eFZJU2RZ",
+    "nombre": "as",
+    "apellidos": "as",
+    "correo_electronico": "as"
   }
 }
