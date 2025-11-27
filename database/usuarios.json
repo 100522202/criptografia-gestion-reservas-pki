@@ -94,5 +94,13 @@
     "nombre": "r",
     "apellidos": "r",
     "correo_electronico": "r"
+  },
+  "paco": {
+    "rol": "usuario_comun",
+    "usuario_name": "paco",
+    "password_hash": "zKLI/JMHDnGBjwY2GEnYzvfYBt9qmAZgy6eY8CsDPERjM3/qWZVP2/4V3YVL0v7A",
+    "nombre": "as",
+    "apellidos": "as",
+    "correo_electronico": "as"
   }
 }

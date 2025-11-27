@@ -104,7 +104,7 @@ def registro_usuario(usuario_name, password, nombre, apellidos, correo):
 
     generar_par_claves(usuario_name, password)
     clave_privada_usuario = cargar_clave_privada(usuario_name, password)
-    #TODO: ¿Luego hay que borrar clave publica.pem?
+    #TODO: CREO QUE Luego hay que borrar clave publica.pem
 
     # Generamos el csr
     csr_usuario = cm.generar_csr_usuario(usuario_name, nombre, apellidos,correo, clave_privada_usuario)
