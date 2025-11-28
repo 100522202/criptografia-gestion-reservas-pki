@@ -7,7 +7,7 @@ def main():
     #Creamos el admin si no existe
     crear_admin_seguro()
     root = tk.Tk()
-    app = Interfaz(root)
+    Interfaz(root)
     root.mainloop()
 
 

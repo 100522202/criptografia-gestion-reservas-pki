@@ -4,23 +4,15 @@
     "nombre": "Administrador",
     "apellidos": "",
     "correo_electronico": "admin@hotel.com",
-    "password_hash": "A0Wt1txwcVfxX+EydiEFrbGQAvPiK9LJAvpH4gB0JLles9K1Qn6Q2XbfvrgKGmRh",
+    "password_hash": "hYSnzhFSMTJq+IJTTwhObQNgKKdHRcKOLTR3IBbklUg4OtVTlQv+VZsb6Bp5BMAg",
     "rol": "admin"
   },
-  "gui": {
+  "ayman": {
     "rol": "usuario_comun",
-    "usuario_name": "gui",
-    "password_hash": "umn4EZjKYOMsBblQIXOVRcAFkdm+xwKYVKiKdyAxqEPKbcm1LdirAAWE9X8hjYYg",
-    "nombre": "gui",
-    "apellidos": "gui",
-    "correo_electronico": "gui"
-  },
-  "ter": {
-    "rol": "usuario_comun",
-    "usuario_name": "ter",
-    "password_hash": "nSl/ufWJmlAKxJBXha5q+kOmscOf8CBgdlBFOzwndr5KW9CRYESO38cjPd4tyW7G",
-    "nombre": "ter",
-    "apellidos": "ter",
-    "correo_electronico": "ter"
+    "usuario_name": "ayman",
+    "password_hash": "MVXg+9p4Y1atxHrABzdSeCtoUeyEtcf3J575YSmzNICadd7iqwAonhw39Y4/NY+p",
+    "nombre": "ayman",
+    "apellidos": "ayman",
+    "correo_electronico": "ayman"
   }
 }
