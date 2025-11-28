@@ -2,6 +2,7 @@ import os
 from certificate_management import cargar_certificado
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
+from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 
 CARPETA_CLAVES = "claves"
@@ -89,6 +90,27 @@ def cargar_clave_publica(usuario_name: str):
     """
     certificado_usuario = cargar_certificado(usuario_name)
     
+    # Vamos a verificar la firma con el certificado de la AC1
+
+    # Lo cargamos
+    with open("AC1/ac1cert.pem", "rb") as f:
+        cert_ac_bytes = f.read()
+
+    certificado_ac = x509.load_pem_x509_certificate(
+        cert_ac_bytes, 
+        default_backend()
+    )
+
+    # Verificamos
+    try:
+        certificado_usuario.verify_directly_issued_by(certificado_ac)
+    except Exception as e:
+        print("Error verificando el certificado:", e)
+        raise
+    
+    print("[DEBUG] El certificado ha sido verificado correctamente")
+
+
     return certificado_usuario.public_key()
 
 def rsa_oaep_encrypt(clave_publica, datos: bytes) -> bytes:

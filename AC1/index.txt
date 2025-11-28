@@ -3,3 +3,4 @@ V	261128111237Z		02	unknown	/C=ES/ST=Madrid/CN=moha/emailAddress=moha
 V	261128113650Z		03	unknown	/C=ES/ST=Madrid/CN=ivix/emailAddress=ivix
 V	261128134539Z		04	unknown	/C=ES/ST=Madrid/CN=gui/emailAddress=gui
 V	261128134816Z		05	unknown	/C=ES/ST=Madrid/CN=admin/emailAddress=admin
+V	261128140950Z		06	unknown	/C=ES/ST=Madrid/CN=ter/emailAddress=ter

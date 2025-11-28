@@ -14,5 +14,13 @@
     "nombre": "gui",
     "apellidos": "gui",
     "correo_electronico": "gui"
+  },
+  "ter": {
+    "rol": "usuario_comun",
+    "usuario_name": "ter",
+    "password_hash": "nSl/ufWJmlAKxJBXha5q+kOmscOf8CBgdlBFOzwndr5KW9CRYESO38cjPd4tyW7G",
+    "nombre": "ter",
+    "apellidos": "ter",
+    "correo_electronico": "ter"
   }
 }
