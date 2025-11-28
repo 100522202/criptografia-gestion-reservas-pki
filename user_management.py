@@ -6,7 +6,7 @@ import tkinter as tk
 from tkinter import simpledialog, messagebox
 import hash_functions
 from hash_functions import hash_text
-from key_management import generar_par_claves, cargar_clave_privada
+from key_management import generar_par_claves, cargar_clave_publica
 
 
 
@@ -111,27 +111,17 @@ def registro_usuario(usuario_name, password, nombre, apellidos, correo):
     except Exception:
         pass  # Ignorar en Windows
 
-    clave_privada_usuario = cargar_clave_privada(usuario_name, password)
+    clave_publica_usuario = cargar_clave_publica(usuario_name)
     #TODO: CREO QUE Luego hay que borrar clave publica.pem
 
     # Generamos el csr
-    csr_usuario = cm.generar_csr_usuario(usuario_name, nombre, apellidos,correo, clave_privada_usuario)
+    csr_usuario = cm.generar_csr_usuario(usuario_name, nombre, apellidos,correo, clave_publica_usuario)
 
     
     if csr_usuario:
         # Lo guardamos
         cm.guardar_csr(usuario_name,csr_usuario)
-    
-        # 5. *** FIRMAR EL CSR CON LA CA ***
-        certificado_usuario_pem = cm.firmar_csr_usuario(csr_usuario, usuario_name) 
-
-        if certificado_usuario_pem is None:
-            return False, "Error al firmar el CSR con la CA."
-
-        # TODO: Opcional: ¿guardar el certificado_usuario_pem en la estructura de 'usuarios'?
-        # usuarios[usuario_name]["certificado"] = certificado_usuario_pem.decode('utf-8')
-        
         guardar_usuarios(usuarios)
         return True, "Usuario registrado, claves, CSR y certificado generados correctamente."
     else:
-        return False, "Error al generar la CSR."
+        return False, "Error al generar la CSR, el usuario no se ha registrado"

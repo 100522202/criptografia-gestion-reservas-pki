@@ -13,14 +13,14 @@ RUTA_CLAVE_PRIVADA_CA = "AC1/privado/ca1key.pem"
 # TODO: ¿habría que quitar de aquí lo de password y hacerlo de otra forma?
 PASSWORD_CA = b"yebenes" # load_pem_private_key() requiere la función en bytes
 
-def generar_csr_usuario(usuario_name, nombre, apellidos, correo, clave_privada_usuario) -> bytes:
+def generar_csr_usuario(usuario_name, nombre, apellidos, correo, clave_publica_usuario) -> bytes:
     """
     Genera una Solicitud de Firma de Certificado (CSR) utilizando la clave privada
     y los datos del usuario, siguiendo el patrón de cryptography.
     
     Devuelve la CSR codificada en formato PEM.
     """
-    if clave_privada_usuario is None:
+    if clave_publica_usuario is None:
         return None
 
     # Quienes somos
@@ -40,15 +40,8 @@ def generar_csr_usuario(usuario_name, nombre, apellidos, correo, clave_privada_u
     # Construir el objeto CSR
     csr = x509.CertificateSigningRequestBuilder().subject_name(
         subject
-    ).add_extension(
-        # Generalmente, para certificados de usuario final, no se necesita SAN (DNSName),
-        # pero es buena práctica para incluir el correo como SAN (RFC 5280) si lo deseas.
-        x509.SubjectAlternativeName([
-            x509.RFC822Name(correo)
-        ]),
-        critical=False,
     ).sign(
-        clave_privada_usuario,
+        clave_publica_usuario,
         hashes.SHA256() # Algoritmo de hash recomendado para la firma del CSR
     )
 
@@ -64,7 +57,7 @@ def guardar_csr(usuario_name, csr_pem):
         os.makedirs("certs")
     
     # Escribir la CSR al disco para dársela a la CA (o al proceso de firma)
-    with open(f"certs/{usuario_name}.csr", "wb") as f:
+    with open(f"solicitud_certs/{usuario_name}.csr", "wb") as f:
         f.write(csr_pem)
     print(f"[DEBUG] CSR guardado en certs/{usuario_name}.csr")
 
