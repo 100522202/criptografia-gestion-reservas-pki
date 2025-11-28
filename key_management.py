@@ -1,4 +1,5 @@
 import os
+from certificate_management import cargar_certificado
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.backends import default_backend
@@ -82,19 +83,13 @@ def cargar_clave_privada(usuario_name: str, password: str):
     return clave_privada
 
 def cargar_clave_publica(usuario_name: str):
-    # TODO: HABRÁ QUE ELIMINAR TODAS LAS LLAMADAS A ESTA FUNCIÓN Y OBTENER LA CLAVE PÚBLICA DEL CERTIFICADO DIRECTAMENTE
     """
     Carga la clave pública RSA del usuario desde su archivo .pem.
     Retorna el objeto clave pública si tiene éxito, o lanza una excepción si falla.
     """
-    ruta_clave = f"claves/{usuario_name}_public.pem"
+    certificado_usuario = cargar_certificado(usuario_name)
     
-    with open(ruta_clave, "rb") as f:
-        clave_publica = serialization.load_pem_public_key(
-            f.read(),
-            backend=default_backend()
-        )
-    return clave_publica
+    return certificado_usuario.public_key()
 
 def rsa_oaep_encrypt(clave_publica, datos: bytes) -> bytes:
     """Cifra datos con RSA-OAEP usando SHA-256."""

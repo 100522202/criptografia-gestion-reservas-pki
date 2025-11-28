@@ -5,6 +5,7 @@ import certificate_management as cm
 import tkinter as tk
 from tkinter import simpledialog, messagebox
 import hash_functions
+from certificate_management import generar_csr_usuario, guardar_csr
 from hash_functions import hash_text
 from key_management import generar_par_claves, cargar_clave_privada
 
@@ -59,6 +60,11 @@ def crear_admin_seguro():
     generar_par_claves("admin", password1)
     guardar_usuarios(usuarios)
 
+    clave_privada_admin = cargar_clave_privada("admin", password1)
+    # Generamos también el csr (que tenemos que firmar al principio)
+    csr_admin = generar_csr_usuario("admin", "admin", "admin", "admin", clave_privada_admin)
+    guardar_csr("admin", csr_admin)
+    
     #Para que nadie pueda modificarlo o leer la clave privada
     try:
         os.chmod("claves/admin_private.pem", 0o600)

@@ -4,7 +4,6 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 import os
-import datetime
 
 
 # Rutas de la AC
@@ -58,3 +57,16 @@ def guardar_csr(usuario_name, csr_pem):
     with open(f"solicitud_certs/{usuario_name}.csr", "wb") as f:
         f.write(csr_pem)
     print(f"[DEBUG] CSR guardado en certs/{usuario_name}.csr")
+
+def cargar_certificado(usuario_name):
+    """ Carga el certificado del usuario a partir de su nombre"""
+    with open(f"certs_usuarios/{usuario_name}.pem", "rb") as f:
+        certificado_bytes = f.read()
+    
+    certificado = x509.load_pem_x509_certificate(
+        certificado_bytes, 
+        default_backend()
+    )
+
+    return certificado
+    
