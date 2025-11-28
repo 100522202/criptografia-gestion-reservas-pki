@@ -6,5 +6,13 @@
     "correo_electronico": "admin@hotel.com",
     "password_hash": "A0Wt1txwcVfxX+EydiEFrbGQAvPiK9LJAvpH4gB0JLles9K1Qn6Q2XbfvrgKGmRh",
     "rol": "admin"
+  },
+  "gui": {
+    "rol": "usuario_comun",
+    "usuario_name": "gui",
+    "password_hash": "umn4EZjKYOMsBblQIXOVRcAFkdm+xwKYVKiKdyAxqEPKbcm1LdirAAWE9X8hjYYg",
+    "nombre": "gui",
+    "apellidos": "gui",
+    "correo_electronico": "gui"
   }
 }

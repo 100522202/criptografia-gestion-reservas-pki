@@ -128,6 +128,6 @@ def registro_usuario(usuario_name, password, nombre, apellidos, correo):
         # Lo guardamos
         cm.guardar_csr(usuario_name,csr_usuario)
         guardar_usuarios(usuarios)
-        return True, "Usuario registrado, claves, CSR y certificado generados correctamente."
+        return True, "Usuario registrado, claves y CSR generados correctamente."
     else:
         return False, "Error al generar la CSR, el usuario no se ha registrado"
