@@ -6,7 +6,7 @@ import tkinter as tk
 from tkinter import simpledialog, messagebox
 import hash_functions
 from hash_functions import hash_text
-from key_management import generar_par_claves, cargar_clave_publica
+from key_management import generar_par_claves, cargar_clave_privada
 
 
 
@@ -111,11 +111,11 @@ def registro_usuario(usuario_name, password, nombre, apellidos, correo):
     except Exception:
         pass  # Ignorar en Windows
 
-    clave_publica_usuario = cargar_clave_publica(usuario_name)
+    clave_privada_usuario = cargar_clave_privada(usuario_name, password)
     #TODO: CREO QUE Luego hay que borrar clave publica.pem
 
     # Generamos el csr
-    csr_usuario = cm.generar_csr_usuario(usuario_name, nombre, apellidos,correo, clave_publica_usuario)
+    csr_usuario = cm.generar_csr_usuario(usuario_name, nombre, apellidos,correo, clave_privada_usuario)
 
     
     if csr_usuario:

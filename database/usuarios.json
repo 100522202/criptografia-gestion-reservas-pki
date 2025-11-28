@@ -110,5 +110,13 @@
     "nombre": "as",
     "apellidos": "as",
     "correo_electronico": "as"
+  },
+  "moha": {
+    "rol": "usuario_comun",
+    "usuario_name": "moha",
+    "password_hash": "uaPpYQO+U1yAZYRgn5m0Ceyj5ib7B+HWXOC4y5OGLADHZRpw4MrWCzP6Vr8gv45c",
+    "nombre": "moha",
+    "apellidos": "moha",
+    "correo_electronico": "moha"
   }
 }
