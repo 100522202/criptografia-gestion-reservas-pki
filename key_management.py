@@ -29,6 +29,8 @@ def generar_clave_publica(clave_privada):
     """Esta función va va generar la clave pública a partir de su clave privada de cada usuario
     y devovlerá sus bytes serializados en PEM"""
 
+    # ES UNA FUNCIÓN OBSOLETA QUE SE UTILIZABA EN LA VERSION DEL PRIMER ENTREGABLE
+
     clave_publica = clave_privada.public_key()
 
     public_pem = clave_publica.public_bytes(
@@ -48,22 +50,22 @@ def generar_par_claves(usuario_name:str, password:str):
     #vamos a generar la clave privada y serializarla
     pem_privado, clave_privada = generar_clave_privada(password)
 
-    #vamos a generar la clave pública a partir de la privada anterior
-    public_pem = generar_clave_publica(clave_privada)
+    # YA NO GENERAMOS CLAVE PÚBLICA
+    # public_pem = generar_clave_publica(clave_privada)
 
     #Las guardamos en archivos .pem
     ruta_privada = os.path.join(CARPETA_CLAVES, f"{usuario_name}_private.pem")
-    ruta_publica = os.path.join(CARPETA_CLAVES, f"{usuario_name}_public.pem")
+    # ruta_publica = os.path.join(CARPETA_CLAVES, f"{usuario_name}_public.pem")
     
     with open(ruta_privada, "wb") as f:
         f.write(pem_privado)
 
-    with open(ruta_publica, "wb") as f:
-        f.write(public_pem)
+    # with open(ruta_publica, "wb") as f:
+        # f.write(public_pem)
     
     return {
         "mensaje":"Claves guardadas correctamente",
-        "clave_publica_path": ruta_publica,
+        # "clave_publica_path": ruta_publica,
         "clave_privada_path": ruta_privada
     }
 
