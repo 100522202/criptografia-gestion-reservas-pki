@@ -78,17 +78,20 @@ def descifrar_reserva(
 ) -> list:
     """
     Descifra y valida una reserva protegida con AES-GCM + RSA y firma RSA-PSS.
-    Devuelve los datos de la reserva como lista [usuario, fecha, datos_json].
+    Devuelve los datos de la reserva como lista/datos en claro.
     """
+    # Si no nos pasan la clave privada, la cargamos desde disco usando la contraseña
     if clave_privada is None:
         clave_privada = key_management.cargar_clave_privada(usuario_name, password)
     print(f"[DEBUG] booking_management: -- Inicio descifrado reserva para {usuario_name} --")
 
+    # Elegimos qué copia de la clave AES cifrada usar (normal o específica para admin)
     if usuario_name == "admin" and "aes_clave_cifrada_admin" in reserva:
         aes_clave_cifrada_bytes = b64decode(reserva["aes_clave_cifrada_admin"])
     else:
         aes_clave_cifrada_bytes = b64decode(reserva["aes_clave_cifrada"])
 
+    # Desciframos la clave AES con RSA-OAEP
     clave_aes = key_management.rsa_oaep_decrypt(clave_privada, aes_clave_cifrada_bytes)
     origen_clave = (
         "admin" if usuario_name == "admin" and "aes_clave_cifrada_admin" in reserva else usuario_name
@@ -97,10 +100,14 @@ def descifrar_reserva(
         f"[DEBUG] booking_management: Clave AES recuperada mediante RSA-OAEP (destinada a {origen_clave})."
     )
 
+    # Preparamos AES-GCM con la clave simétrica recuperada
     aesgcm = AESGCM(clave_aes)
     nonce = b64decode(reserva["nonce"])
     reserva_cifrada_bytes = b64decode(reserva["reserva_cifrada"])
 
+    # Determinamos el usuario asociado a la reserva:
+    #  - si es admin, lo recuperamos cifrado
+    #  - si no, es el propio usuario
     if usuario_name == "admin":
         usuario_cifrado_b64 = reserva.get("usuario_original_cifrado")
         if not usuario_cifrado_b64:
@@ -114,6 +121,7 @@ def descifrar_reserva(
     else:
         usuario_asociado = usuario_name
 
+    # Desciframos los datos con AES-GCM usando el usuario como "associated data"
     datos_descifrados_bytes = aesgcm.decrypt(
         nonce,
         reserva_cifrada_bytes,
@@ -121,23 +129,22 @@ def descifrar_reserva(
     )
     print("[DEBUG] booking_management: AES-GCM descifrado correctamente.")
 
+    # Pasamos de bytes -> string -> estructura Python (lista/dict)
     datos_descifrados_str = datos_descifrados_bytes.decode("utf-8")
     datos_descifrados = json.loads(datos_descifrados_str)
 
+    # Recuperamos la firma almacenada
     firma_b64 = reserva.get("firma")
     if not firma_b64:
         raise ValueError("Reserva sin firma almacenada; se descarta.")
     firma = b64decode(firma_b64)
 
-    if isinstance(datos_descifrados, list) and datos_descifrados:
-        titular_para_firma = datos_descifrados[0]
-    elif isinstance(datos_descifrados, dict):
-        titular_para_firma = datos_descifrados.get("usuario_asociado")
-    else:
-        titular_para_firma = None
+    # El titular de la firma es el usuario asociado a la reserva
+    titular_para_firma = usuario_asociado
     if not titular_para_firma:
-        raise ValueError("Titular no encontrado en los datos descifrados.")
+        raise ValueError("Titular no encontrado para la verificación de la firma.")
 
+    # Cargamos la clave pública desde su certificado y verificamos la firma
     clave_publica_titular = key_management.cargar_clave_publica(titular_para_firma)
     if not signing.verificar_firma(clave_publica_titular, datos_descifrados_str, firma):
         raise ValueError("Firma inválida tras descifrar; reserva descartada.")
