@@ -85,11 +85,19 @@ def cargar_clave_privada(usuario_name: str, password: str):
         )
     return clave_privada
 
+def validar_clave_publica(clave_pub, clave_pub_cert):
+    """Funcion que valida que la clave publica recibida coincide con la 
+    clave publica del certificado del usuario"""
+    return clave_pub == clave_pub_cert
+
 def cargar_clave_publica(usuario_name: str):
     """
     Carga la clave pública RSA del usuario desde su archivo .pem.
     Retorna el objeto clave pública si tiene éxito, o lanza una excepción si falla.
     """
+    # MODIFICACION PARA PRUEBAS
+    #certificado_usuario = cargar_certificado("rida")
+
     certificado_usuario = cargar_certificado(usuario_name)
     
     # Vamos a verificar la firma con el certificado de la AC1

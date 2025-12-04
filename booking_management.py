@@ -7,6 +7,7 @@ from tkinter import messagebox
 import hash_functions
 import key_management
 import signing
+import certificate_management
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 
@@ -47,10 +48,21 @@ class Booking:
 
         # Protegemos la clave AES con RSA-OAEP para el usuario y el admin
         clave_publica_usuario = key_management.cargar_clave_publica(self.usuario_asociado)
+        check_cert_usuario = certificate_management.cargar_certificado(self.usuario_asociado)
+
+        if not key_management.validar_clave_publica(clave_publica_usuario, check_cert_usuario.public_key()):
+            print("[ERROR] No se pudo cifrar la reserva, el certificado no coincide con el usuario")
+            return False
+
         aes_clave_cifrada = key_management.rsa_oaep_encrypt(clave_publica_usuario, aes_clave)
         print("[DEBUG] booking_management: Clave AES protegida con RSA-OAEP para el usuario.")
 
         clave_publica_admin = key_management.cargar_clave_publica("admin")
+        check_cert_admin = certificate_management.cargar_certificado("admin")
+
+        if not key_management.validar_clave_publica(clave_publica_admin, check_cert_admin.public_key()):
+            print("[ERROR] No se pudo cifrar la reserva, el certificado no coincide con el usuario")
+            return False
         aes_clave_cifrada_admin = key_management.rsa_oaep_encrypt(clave_publica_admin, aes_clave)
         usuario_cifrado_admin = key_management.rsa_oaep_encrypt(
             clave_publica_admin,
@@ -145,6 +157,8 @@ def descifrar_reserva(
         raise ValueError("Titular no encontrado para la verificación de la firma.")
 
     # Cargamos la clave pública desde su certificado y verificamos la firma
+    # MODIFICACION PARA PRUEBAS
+    #clave_publica_titular = key_management.cargar_clave_publica("rida")
     clave_publica_titular = key_management.cargar_clave_publica(titular_para_firma)
     if not signing.verificar_firma(clave_publica_titular, datos_descifrados_str, firma):
         raise ValueError("Firma inválida tras descifrar; reserva descartada.")
@@ -304,9 +318,12 @@ def guardar_reserva(usuario, password, email, telefono, dni, fecha, ventana_crea
         booking = Booking(usuario, json.dumps(datos), fecha)
         clave_privada_usuario = key_management.cargar_clave_privada(usuario, password)
         reserva_cifrada = booking.cifrar_reserva(clave_privada_usuario)
-        almacenar_reserva(reserva_cifrada, RESERVAS_FILE)
+        if reserva_cifrada:
+            almacenar_reserva(reserva_cifrada, RESERVAS_FILE)
 
-        messagebox.showinfo("Éxito", "Reserva creada, firmada y cifrada correctamente.")
-        ventana_crear.destroy()
+            messagebox.showinfo("Éxito", "Reserva creada, firmada y cifrada correctamente.")
+            ventana_crear.destroy()
+        else:
+            messagebox.showinfo("Error", "Revise la terminal para más información")
     except Exception as e:
         messagebox.showerror("Error", f"No se pudo crear la reserva:\n{e}")

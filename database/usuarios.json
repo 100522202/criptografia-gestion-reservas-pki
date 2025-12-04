@@ -1,0 +1,34 @@
+{
+  "admin": {
+    "usuario_name": "admin",
+    "nombre": "Administrador",
+    "apellidos": "",
+    "correo_electronico": "admin@hotel.com",
+    "password_hash": "WsmP99Nw3hghd/M6TFoGLMtZlKG4q/xmbEKJKU2/GGuGwMWnWtf2i8ZDVC471UYO",
+    "rol": "admin"
+  },
+  "rida": {
+    "rol": "usuario_comun",
+    "usuario_name": "rida",
+    "password_hash": "UL/nd/lfviOT8YwcquLIRkdWVN3VWc1sBliTJkEHsHZQptKgITXl3Clx26BAtP2i",
+    "nombre": "as",
+    "apellidos": "as",
+    "correo_electronico": "as"
+  },
+  "nocert": {
+    "rol": "usuario_comun",
+    "usuario_name": "nocert",
+    "password_hash": "6nlMSztnzdTkKdScS2jrMgqZnK6B+gThJLyZ6J1KNgoQQD7RFmT+FdJc1RA9jS42",
+    "nombre": "as",
+    "apellidos": "as",
+    "correo_electronico": "as"
+  },
+  "gui": {
+    "rol": "usuario_comun",
+    "usuario_name": "gui",
+    "password_hash": "fDPT6LIi4D0djauBK+qjwPeYbhh02Zcj60suibRj+Fnvxiui7Vqpwfe7RGVpqbZs",
+    "nombre": "as",
+    "apellidos": "as",
+    "correo_electronico": "as"
+  }
+}
