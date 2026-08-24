@@ -4,11 +4,11 @@ Práctica de la asignatura **Criptografía y Seguridad Informática (UC3M)**.
 
 ---
 
-## 📌 Descripción del Proyecto
+## Descripción del Proyecto
 
 Aplicación de escritorio en **Python (Tkinter)** que implementa un sistema integral de seguridad y privacidad para la gestión y almacenamiento de reservas.
 
-### 🔒 Mecanismos Criptográficos Implementados:
+### Mecanismos Criptográficos Implementados:
 * **Autenticación Robusta:** Derivación y almacenamiento seguro de contraseñas con **Argon2id** y salting aleatorio.
 * **Infraestructura de Clave Pública (PKI):**
   * Autoridad de Certificación propia (**AC1**) con par de claves RSA raíz y certificado autofirmado X.509.
@@ -20,7 +20,7 @@ Aplicación de escritorio en **Python (Tkinter)** que implementa un sistema inte
 
 ---
 
-## 🚀 Ejecución
+## Ejecución
 
 ```bash
 # Instalar dependencias
